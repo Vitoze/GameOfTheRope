@@ -11,5 +11,8 @@ package concentration_site;
  */
 public interface IThieves {
     
-    boolean amINeeded();
+    public boolean amINeeded();
+    
+    public void waitForOrders();
+    
 }
