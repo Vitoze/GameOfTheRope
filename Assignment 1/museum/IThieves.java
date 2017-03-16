@@ -10,5 +10,6 @@ package museum;
  * @author João Brito
  */
 public interface IThieves {
-    
+        
+    public void rollACanvas();
 }

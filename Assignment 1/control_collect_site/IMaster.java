@@ -3,20 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package concentration_site;
+package control_collect_site;
 
 /**
  *
  * @author João Brito
  */
-public interface IThieves {
+public interface IMaster {
+    public boolean prepareAssaultParty();
     
-    public boolean amINeeded();
-    
-    public void waitForOrders();
-    
-    public int Orders();
-    
-    public void prepareExcursion();
-    
+    public boolean sumUpResults();
 }

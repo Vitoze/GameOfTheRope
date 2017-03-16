@@ -3,20 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package concentration_site;
+package assault_party;
 
 /**
  *
  * @author João Brito
  */
 public interface IThieves {
+    public void crawlIn();
     
-    public boolean amINeeded();
+    public void crawlOut();
     
-    public void waitForOrders();
+    public void waitForSendAssaultParty();
     
-    public int Orders();
+    public void waitForMember();
     
-    public void prepareExcursion();
+    public boolean atMuseum();
     
+    public boolean atConcentration();
+    
+    public void waitForReverseDirection();
 }

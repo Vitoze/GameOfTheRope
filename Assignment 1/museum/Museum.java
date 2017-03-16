@@ -10,7 +10,7 @@ import general_info_repo.Log;
  *
  * @author João Brito
  */
-public class Museum implements IThieves{
+public class Museum{
     private Room[] rooms;
     
     public Museum(){
@@ -23,9 +23,9 @@ public class Museum implements IThieves{
     }
 
     // rollACanvas
-    public static boolean rollACanvas(int idSala)
+    public static void rollACanvas(int idSala)
     {
-        return false;
+        
     }
 
     // updateSack

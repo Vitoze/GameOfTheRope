@@ -21,10 +21,10 @@ public class AssaultParty {
 
 	}
 
-	// getPos -> int
-	public static void getPos(int idLadrao)
+	// getPos
+	public static int getPos(int idLadrao)
 	{
-
+            return 0;
 	}
 
 	// updateAssaultPosition 
