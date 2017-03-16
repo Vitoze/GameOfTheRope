@@ -29,9 +29,9 @@ public class Thieves extends Thread {
         this.collect = collect;
         this.party = party;
         this.log = Log.getInstance();
-        state= ThievesState.OUTSIDE;
         s = 'w';
         this.md = md;
+        state= ThievesState.OUTSIDE;
     }
     
     // This function represents the life cycle of Thieves
@@ -58,6 +58,7 @@ public class Thieves extends Thread {
                             break;
                         case 1:
                             heistOver = true;
+                            break;
                     }
                     break;
                 case CRAWLING_INWARDS:

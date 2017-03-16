@@ -13,4 +13,20 @@ public interface IMaster {
     public boolean prepareAssaultParty();
     
     public boolean sumUpResults();
+    
+    public void startOperations();
+    
+    public void updateMaster(String stat);
+
+    public void prepareAssaultParty(int idLadrao);
+    
+    public void sendAssaultParty();
+	
+    public void collectCanvas();
+    
+    public void takeARest();
+    
+    public int appraiseSit();
+    
+    public void waitForPrepareExcursion();
 }
