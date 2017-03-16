@@ -33,6 +33,10 @@ public class Thieves extends Thread {
         this.md = md;
         state= ThievesState.OUTSIDE;
     }
+
+    public Thieves() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     // This function represents the life cycle of Thieves
     @Override

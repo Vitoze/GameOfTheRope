@@ -39,4 +39,16 @@ public class Log {
     public synchronized static Log getInstance(){
         return instance;
     }
+    
+    public synchronized void writeEnd(){
+        pw.println("\nLegend:");
+        pw.println("MstT Stat    – state of the master thief");
+        pw.println("Coa # Stat - state of the coach of team # (# - 1 .. 2)");
+        pw.println("TRIAL – ?  – contestant identification at the position ? at the end of the rope for present trial (? - 1 .. 3)");
+        pw.println("TRIAL – NB – trial number");
+        pw.println("TRIAL – PS – position of the centre of the rope at the beginning of the trial");
+        pw.flush();
+        pw.close();
+    } 
+    
 }
