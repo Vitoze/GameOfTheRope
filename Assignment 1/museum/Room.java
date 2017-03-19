@@ -14,8 +14,18 @@ public class Room {
     private int dt;
     private int np;
     
+    public Room(int id, int dt, int np){
+        this.id = id;
+        this.dt = dt;
+        this.np = np;
+    }
+    
+    public int getID(){
+        return this.id;
+    }
+    
     public int getDistance(int id){
-        return dt;
+        return this.dt;
     }
     
     public void setDistance(int id, int dt){
@@ -23,7 +33,7 @@ public class Room {
     }
     
     public int getPaintings(int id){
-        return np;
+        return this.np;
     }
     
     public void setPaintings(int id, int np){

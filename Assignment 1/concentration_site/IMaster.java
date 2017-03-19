@@ -9,10 +9,10 @@ package concentration_site;
  *
  * @author João Brito
  */
-public interface IThieves {
+public interface IMaster {
+
+    public void prepareAssaultParty();
     
-    public int amINeeded();
-    
-    public void prepareExcursion(int id);
+    public void waitForPrepareExcursion();
     
 }

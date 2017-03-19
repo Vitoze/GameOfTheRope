@@ -1,25 +1,43 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package entities;
 
+import general_info_repo.Log;
 
 /**
- *
+ * Master instance.
  * @author João Brito
  */
 public class Master extends Thread{
     private final control_collect_site.IMaster control;
+    private final concentration_site.IMaster concentration;
+    private final assault_party1.IMaster party1;
+    private final assault_party2.IMaster party2;
+    private final Log log;
     private MasterState state;
     
-    public Master(control_collect_site.IMaster control){
+    /*
+        It will be passed to the Master the methods of the control_collection_site
+        that the master have access.
+        @param control Instance that implements control_collection_site methods
+    */
+    public Master(control_collect_site.IMaster control, concentration_site.IMaster concentration, assault_party1.IMaster party1, assault_party2.IMaster party2){
         this.control = control;
+        this.concentration = concentration;
+        this.party1 = party1;
+        this.party2 = party2;
+        this.log = Log.getInstance();
+        
+        this.setName("Master");
         state = MasterState.PLANNING_THE_HEIST;
+        
+        this.log.initMasterState(state);
     }
     
-    // This function represents the life cycle of Master
+    /**
+     * This function represents the life cycle of Master
+     */
     @Override
     public void run(){
         boolean heistOver = false;
@@ -27,14 +45,14 @@ public class Master extends Thread{
             switch(this.state){
                 case PLANNING_THE_HEIST:
                     this.control.startOperations();
+                    this.log.newHeist();
+                    
                     this.state = MasterState.DECIDING_WHAT_TO_DO;
                     break;
                 case DECIDING_WHAT_TO_DO:
                     switch(this.control.appraiseSit()){
-                        case 0:
-                            break;
                         case 1:
-                            this.control.prepareAssaultParty();
+                            this.concentration.prepareAssaultParty();
                             this.state = MasterState.ASSEMBLING_A_GROUP;
                             break;
                         case 2:
@@ -44,8 +62,8 @@ public class Master extends Thread{
                     }                    
                     break;
                 case ASSEMBLING_A_GROUP:
-                    this.control.waitForPrepareExcursion();
-                    this.control.sendAssaultParty();
+                    this.concentration.waitForPrepareExcursion();
+                    this.party1.sendAssaultParty();
                     this.state = MasterState.WAINTING_FOR_GROUP_ARRIVAL;
                     break;
                 case WAINTING_FOR_GROUP_ARRIVAL:
@@ -57,6 +75,7 @@ public class Master extends Thread{
                     heistOver = true;
                     break;
             }
+            this.log.setMasterState(state);
         }
     }
 }

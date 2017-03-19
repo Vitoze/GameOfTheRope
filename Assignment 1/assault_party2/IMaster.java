@@ -3,16 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package concentration_site;
+package assault_party2;
 
 /**
  *
  * @author João Brito
  */
-public interface IThieves {
+public interface IMaster {
     
-    public int amINeeded();
-    
-    public void prepareExcursion(int id);
-    
+    public void sendAssaultParty();
 }

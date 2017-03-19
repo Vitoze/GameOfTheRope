@@ -10,15 +10,12 @@ package control_collect_site;
  * @author João Brito
  */
 public interface IMaster {
-    public boolean prepareAssaultParty();
     
     public boolean sumUpResults();
     
     public void startOperations();
     
     public void updateMaster(String stat);
-
-    public void prepareAssaultParty(int idLadrao);
     
     public void sendAssaultParty();
 	
