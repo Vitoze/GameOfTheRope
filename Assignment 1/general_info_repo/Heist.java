@@ -19,15 +19,18 @@ public class Heist {
     private final HashMap<Integer, Integer> thieves_maxDisplacement;
     private final HashMap<Integer, ThievesState> thieves_states;
     private final HashMap<Integer, Character> thieves_situation;
-    private final HashMap<Integer, Integer> assault_party1_id;
-    private final HashMap<Integer, Integer> assault_party2_id;
+    private final int[] assault_party1_id;
+    private final int[] assault_party2_id;
     private final HashMap<Integer, Integer> assault_party1_pos;
     private final HashMap<Integer, Integer> assault_party2_pos;
     private final HashMap<Integer, Integer> assault_party1_cv;
     private final HashMap<Integer, Integer> assault_party2_cv;
     private final HashMap<Integer, Integer> museum_rooms_distance;
+    private final HashMap<Integer, Integer> museum_rooms_paintings;
     private int assault_party1_Rid;
     private int assault_party2_Rid;
+    private int nElemParty1;
+    private int nElemParty2;
     private MasterState master_state;
     
     private static Heist instance = null;
@@ -36,15 +39,18 @@ public class Heist {
         this.thieves_maxDisplacement = new HashMap<>();
         this.thieves_states = new HashMap<>();
         this.thieves_situation = new HashMap<>();
-        this.assault_party1_id = new HashMap<>();
-        this.assault_party2_id = new HashMap<>();
+        this.assault_party1_id = new int[3];
+        this.assault_party2_id = new int[3];
         this.assault_party1_pos = new HashMap<>();
         this.assault_party2_pos = new HashMap<>();
         this.assault_party1_cv = new HashMap<>();
         this.assault_party2_cv = new HashMap<>();
         this.assault_party1_Rid = 0;
         this.assault_party2_Rid = 0;
+        this.nElemParty1 = 0;
+        this.nElemParty2 = 0;
         this.museum_rooms_distance = new HashMap<>();
+        this.museum_rooms_paintings = new HashMap<>();
     }
     
     /**
@@ -125,54 +131,95 @@ public class Heist {
         return this.assault_party1_Rid;
     }
     
+    public synchronized void setAssaultParty1Rid(int rid) {
+        this.assault_party1_Rid=rid;
+    }
+    
     public synchronized int getAssaultParty2Rid() {
         return this.assault_party2_Rid;
     }
+    
+    public synchronized void setAssaultParty2Rid(int rid) {
+        this.assault_party2_Rid=rid;
+    }
 
     public synchronized int getAssaultParty1ElemId(int i) {
-        return this.assault_party1_id.get(i);
+        return this.assault_party1_id[i-1];
+    }
+    
+    public synchronized void setAssaultParty1ElemId(int id){
+        if(nElemParty1==3){
+            nElemParty1 = 0;
+            this.assault_party1_id[nElemParty1] = id;
+            nElemParty1++;
+        }else{
+            this.assault_party1_id[nElemParty1] = id;
+            nElemParty1++;
+        }
     }
     
     public synchronized int getAssaultParty2ElemId(int i) {
-        return this.assault_party2_id.get(i);
+        return this.assault_party2_id[i-1];
+    }
+    
+    public synchronized void setAssaultParty2ElemId(int id){
+        if(nElemParty2==3){
+            nElemParty2 = 0;
+            this.assault_party2_id[nElemParty2] = id;
+            nElemParty2++;
+        }else{
+            this.assault_party2_id[nElemParty2] = id;
+            nElemParty2++;
+        }
     }
 
     public synchronized int getAssaultParty1ElemPos(int i) {
-        return this.assault_party1_pos.get(i);
+        return this.assault_party1_pos.get(this.assault_party1_id[i-1]);
+    }
+    
+    public synchronized void setAssaultParty1ElemPos(int id, int pos) {
+        if(this.assault_party1_pos.containsKey(id)){
+            this.assault_party1_pos.replace(id, pos);
+        }else{
+            this.assault_party1_pos.put(id, pos);
+        }
     }
     
     public synchronized int getAssaultParty2ElemPos(int i) {
-        return this.assault_party2_pos.get(i);
+        return this.assault_party2_pos.get(this.assault_party2_id[i-1]);
+    }
+    
+    public synchronized void setAssaultParty2ElemPos(int id, int pos) {
+        if(this.assault_party2_pos.containsKey(id)){
+            this.assault_party2_pos.replace(id, pos);
+        }else{
+            this.assault_party2_pos.put(id, pos);
+        }
     }
 
     public synchronized int getAssaultParty1ElemCv(int i) {
-        return this.assault_party1_cv.get(i);
+        return this.assault_party1_cv.get(this.assault_party1_id[i-1]);
+    }
+    
+    public synchronized void setAssaultParty1ElemCv(int id, int cv) {
+        if(this.assault_party1_cv.containsKey(id)){
+            this.assault_party1_cv.replace(id, cv);
+        }else{
+            this.assault_party1_cv.put(id, cv);
+        }
     }
     
     public synchronized int getAssaultParty2ElemCv(int i) {
-        return this.assault_party2_cv.get(i);
+        return this.assault_party2_cv.get(this.assault_party2_id[i-1]);
     }
     
-    /*
-    public synchronized int getRoomPaintings(int i) {
-        return this.museum.get(i).getPaintings(i);
-    }
-    
-    public synchronized int getRoomDistance(int i) {
-        return this.museum.get(i).getDistance(i);
-    }
-
-    public synchronized void setMuseumRooms(Room[] museum_rooms) {
-        for(int i = 0; i < N_ROOMS; i++){
-            int id = museum_rooms[i].getID();
-            if(this.museum.containsKey(id)){
-                this.museum.replace(id, museum_rooms[i]);
-            }else{
-                this.museum.put(id, museum_rooms[i]);
-            }
+    public synchronized void setAssaultParty2ElemCv(int id, int cv) {
+        if(this.assault_party2_cv.containsKey(id)){
+            this.assault_party2_cv.replace(id, cv);
+        }else{
+            this.assault_party2_cv.put(id, cv);
         }
     }
-    */
 
     public synchronized void setMuseumRoomsDistance(int id, int dt) {
         if(this.museum_rooms_distance.containsKey(id)){
@@ -184,5 +231,17 @@ public class Heist {
     
     public synchronized int getMuseumRoomDistance(int id){
         return this.museum_rooms_distance.get(id);
+    }
+    
+    public synchronized void setMuseumRoomsPaintings(int id, int np) {
+        if(this.museum_rooms_paintings.containsKey(id)){
+            this.museum_rooms_paintings.replace(id, np);
+        }else{
+            this.museum_rooms_paintings.put(id, np);
+        }
+    }
+    
+    public synchronized int getMuseumRoomPaintings(int id){
+        return this.museum_rooms_paintings.get(id);
     }
 }

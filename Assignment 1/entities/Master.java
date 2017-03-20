@@ -60,7 +60,8 @@ public class Master extends Thread{
                             this.control.sumUpResults();
                             this.state = MasterState.PRESENTING_THE_REPORT;
                             break;
-                    }                    
+                    }
+                    this.log.setAssaultPartyAction(rooms[1],rooms[2]);
                     break;
                 case ASSEMBLING_A_GROUP:
                     this.concentration.waitForPrepareExcursion();

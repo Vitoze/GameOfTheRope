@@ -161,6 +161,7 @@ public class Log {
     
     public synchronized void setMasterState(MasterState state){
         this.heist.setMasterState(state);
+        this.printStatesLine();
     }
     
     /**
@@ -176,12 +177,53 @@ public class Log {
         this.heist.setThievesMaxDisplacement(id, md);
     }
     
-    public synchronized void initMuseum(int id, int dt) {
+    public synchronized void setThiefState(ThievesState state, int id){
+        this.heist.setThievesState(id, state);
+        this.printStatesLine();
+    }
+    
+    public synchronized void initMuseum(int id, int dt, int np) {
         this.heist.setMuseumRoomsDistance(id, dt);
+        this.heist.setMuseumRoomsPaintings(id, np);
+    }
+    
+    public synchronized void setAssaultPartyAction(int rid1, int rid2){
+        this.heist.setAssaultParty1Rid(rid1);
+        this.heist.setAssaultParty2Rid(rid2);
+    }
+    
+    public synchronized void setAssaultParty1MemberState(int id){
+        this.heist.setAssaultParty1ElemId(id);
+        this.heist.setAssaultParty1ElemPos(id, 0);
+        this.heist.setAssaultParty1ElemCv(id, 0);
+        //this.printAssaultLine();
+    }
+    
+    public synchronized void updateAssaultParty1MemberState(int id, int pos, int cv){
+        this.heist.setAssaultParty1ElemPos(id, pos);
+        this.heist.setAssaultParty1ElemCv(id, cv);
+        this.printAssaultLine();
+    }
+    
+    public synchronized void setAssaultParty2MemberState(int id){
+        this.heist.setAssaultParty2ElemId(id);
+        this.heist.setAssaultParty2ElemPos(id, 0);
+        this.heist.setAssaultParty2ElemCv(id, 0);
+        //this.printAssaultLine();
+    }
+    
+    public synchronized void updateAssaultParty2MemberState(int id, int pos, int cv){
+        this.heist.setAssaultParty2ElemPos(id, pos);
+        this.heist.setAssaultParty2ElemCv(id, cv);
+        this.printAssaultLine();
     }
     
     public synchronized void printLine(){
         this.printStatesLine();
+    }
+    
+    public synchronized void printALine(){
+        this.printAssaultLine();
     }
     
     private void printStatesLine(){
@@ -197,7 +239,7 @@ public class Log {
             pw.print(" ");
         }
         
-        pw.print("\n");
+        pw.println();
         pw.flush();
     }
     
@@ -214,6 +256,7 @@ public class Log {
         }
         pw.print(" ");
         pw.print(this.heist.getAssaultParty2Rid());
+        pw.print(" ");
         for(int i = 1; i<=3; i++){
             pw.print(this.heist.getAssaultParty2ElemId(i));
             pw.print(" ");
@@ -224,11 +267,12 @@ public class Log {
         }
         pw.print(" ");
         for(int i = 1; i<=5; i++){
-            //pw.print(this.heist.getRoomPaintings(i));
+            pw.print(this.heist.getMuseumRoomPaintings(i));
             pw.print(" ");
-            //pw.print(this.heist.getRoomDistance(i));
+            pw.print(this.heist.getMuseumRoomDistance(i));
             pw.print(" ");
         }
+        pw.println();
         pw.flush();      
     }
 

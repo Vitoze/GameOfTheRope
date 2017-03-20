@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package assault_party2;
 
@@ -15,7 +13,6 @@ import java.util.logging.Logger;
  */
 public class AssaultParty2 implements IMaster, IThieves{
     private boolean partyReady = false;
-    private boolean first = true;
     private int lastElemToCrawl = 0;
     private int nextElemToCrawl = 0;
     private int roomId;
@@ -70,72 +67,14 @@ public class AssaultParty2 implements IMaster, IThieves{
         partyReady = true;
         roomId = RId;
         roomDistance = dt;
+        this.nextElemToCrawl = this.partyElemId[0];
+        this.lastElemToCrawl = this.partyElemId[2];
         notifyAll();
     }
     
     @Override
     public synchronized boolean atMuseum(int id) {
         return partyElemPos.get(id) == roomDistance;
-    }
-
-    @Override
-    public synchronized void crawlIn(int id) {
-        if(first){
-            if(this.partyElem.get(id)>=3){
-                this.partyElemPos.replace(id,3);
-            }else{
-                this.partyElemPos.replace(id,this.partyElem.get(id));
-            }
-            this.lastElemToCrawl = id;
-            setNextElemToCrawl(id);
-            first = false;
-        }else{
-            if(this.partyElemPos.get(id)+this.partyElem.get(id)>this.partyElemPos.get(this.lastElemToCrawl)+3){
-                if(this.partyElemPos.get(id)+this.partyElem.get(id)>roomDistance){
-                    this.partyElemPos.replace(id, roomDistance-this.partyElemPos.get(id));
-                }else{
-                    this.partyElemPos.replace(id,this.partyElemPos.get(this.lastElemToCrawl)+3); 
-                }
-                setNextElemToCrawl_LastElem();
-            }else{
-                if(this.partyElemPos.get(id)+this.partyElem.get(id)==this.partyElemPos.get(this.lastElemToCrawl)+3){
-                    if(this.partyElemPos.get(id)+this.partyElem.get(id)==roomDistance){
-                        this.partyElemPos.replace(id,this.partyElem.get(id));
-                        setNextElemToCrawl_LastElem();
-                    }else{
-                        this.partyElemPos.replace(id,this.partyElem.get(id)-1);
-                        this.nextElemToCrawl = id;
-                    }
-                }else{
-                    this.partyElemPos.replace(id,this.partyElem.get(id));
-                    this.nextElemToCrawl = id;
-                }
-            }
-        }
-        notifyAll();
-    }
-    
-    private void setNextElemToCrawl_LastElem(){
-        int min = 50;
-        for(int i=0; i<3; i++){
-            if(this.partyElemPos.get(this.partyElemId[i]) < min){
-                this.nextElemToCrawl = this.partyElemId[i];
-            }
-        }
-        
-    }
-    
-    private void setNextElemToCrawl(int id){
-        for(int i=0; i<3; i++){
-            if(this.partyElemId[i]==id){
-                if(i<2){
-                    this.nextElemToCrawl = this.partyElemId[i++];
-                }else{
-                    this.nextElemToCrawl = this.partyElemId[0];
-                }
-                break;
-            }
-        }
     }
     
     @Override
@@ -150,17 +89,64 @@ public class AssaultParty2 implements IMaster, IThieves{
     }
 
     @Override
+    public synchronized int crawlIn(int id) {
+        // If pos(id)+md>pos(id-1)+3
+        int nextPosition;
+        if(this.partyElemPos.get(id)+this.partyElem.get(id)>this.partyElemPos.get(this.lastElemToCrawl)+3){
+            nextPosition = this.partyElemPos.get(this.lastElemToCrawl)+3;
+            // If distance > roomPos
+            if(nextPosition > roomDistance){
+                nextPosition = roomDistance;
+            }
+            setNextElemToCrawl(id);
+        }else{
+            if(this.partyElemPos.get(id)+this.partyElem.get(id)==this.partyElemPos.get(this.lastElemToCrawl)+3){
+                nextPosition = this.partyElemPos.get(this.lastElemToCrawl)+2;
+                if(nextPosition > roomDistance){
+                    nextPosition = roomDistance;
+                }
+                setNextElemToCrawl(id);
+            }else{
+                nextPosition = this.partyElemPos.get(id)+this.partyElem.get(id);
+            }
+        }
+        this.partyElemPos.replace(id,nextPosition);
+        notifyAll();
+        return this.partyElemPos.get(id);
+    }
+    
+    private void setNextElemToCrawl(int id){
+        for(int i=0; i<3; i++){
+            if(this.partyElemId[i]==id){
+                if(i<2){
+                    this.nextElemToCrawl = this.partyElemId[++i];
+                }else{
+                    this.nextElemToCrawl = this.partyElemId[0];
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    public synchronized void waitForReverseDirection() {
+        partyReady = false;
+        while(!this.partyReady){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AssaultParty2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    @Override
     public void crawlOut() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public boolean atConcentration() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void waitForReverseDirection() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

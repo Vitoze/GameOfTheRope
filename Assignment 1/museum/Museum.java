@@ -24,7 +24,7 @@ public class Museum implements IThieves{
             int dt = rand.nextInt(30) + 15;
             int np = rand.nextInt(16) + 8;
             museum[i] = new Room(i+1,dt,np);
-            log.initMuseum(i+1,dt);
+            log.initMuseum(i+1,dt,np);
         }
     }
 

@@ -63,6 +63,7 @@ public class Thieves extends Thread {
         boolean heistOver = false;
         boolean hasCanvas = false;
         int canvas = 0;
+        int position = 0;
         int party1_room = 0;
         int party2_room = 0;
         int party = 0;
@@ -88,17 +89,21 @@ public class Thieves extends Thread {
                 case CRAWLING_INWARDS:
                     switch(party){
                         case 1:
+                            this.log.setAssaultParty1MemberState(this.id);
                             party1_room=this.party1.waitForSendAssaultParty(this.id, this.md);
                             while(!party1.atMuseum(this.id)){
-                                this.party1.crawlIn(this.id);
                                 this.party1.waitForMember(this.id);
+                                position = this.party1.crawlIn(this.id);
+                                this.log.updateAssaultParty1MemberState(this.id, position, canvas);
                             }
                             break;
                         case 2:
+                            this.log.setAssaultParty2MemberState(this.id);
                             party2_room=this.party2.waitForSendAssaultParty(this.id, this.md);
                             while(!party2.atMuseum(this.id)){
-                                this.party2.crawlIn(this.id);
                                 this.party2.waitForMember(this.id);
+                                position = this.party2.crawlIn(this.id);
+                                this.log.updateAssaultParty2MemberState(this.id, position, canvas);
                             }
                             break;
                     }
@@ -136,6 +141,7 @@ public class Thieves extends Thread {
                     this.state = ThievesState.OUTSIDE;
                     break;
             }
+            this.log.setThiefState(state,this.id);
         }
     }
 }
