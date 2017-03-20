@@ -29,8 +29,13 @@ public class Museum implements IThieves{
     }
 
     @Override
-    public void rollACanvas() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public synchronized int rollACanvas(int id, int rid) {
+        if(museum[rid].getPaintings()>0){
+            museum[rid].setPaintings(museum[rid].getPaintings()-1);
+            return 1;
+        }else{
+            return 0;
+        }
     }
 }
 

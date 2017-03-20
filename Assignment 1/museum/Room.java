@@ -32,11 +32,11 @@ public class Room {
         this.dt=dt;
     }
     
-    public int getPaintings(int id){
+    public int getPaintings(){
         return this.np;
     }
     
-    public void setPaintings(int id, int np){
+    public void setPaintings(int np){
         this.np=np;
     }
 }

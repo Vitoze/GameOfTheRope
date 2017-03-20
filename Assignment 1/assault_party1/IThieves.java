@@ -10,13 +10,13 @@ package assault_party1;
  * @author João Brito
  */
 public interface IThieves {
-    public void crawlIn();
+    public void crawlIn(int id);
     
     public void crawlOut();
     
-    public void waitForSendAssaultParty(int id, int md);
+    public int waitForSendAssaultParty(int id, int md);
     
-    public void waitForMember();
+    public void waitForMember(int id);
     
     public boolean atMuseum(int id);
     

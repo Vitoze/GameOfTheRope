@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  *  @author João Brito
  */
 public class ControlCollectionSite implements IMaster, IThieves {
-    private boolean collectCanvas = true;
+    private boolean collectCanvas = false;
     private LinkedList<Integer> rooms;
     
     /**
@@ -57,8 +57,15 @@ public class ControlCollectionSite implements IMaster, IThieves {
     }
     
     @Override
-    public void takeARest() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public synchronized void takeARest() {
+        collectCanvas = false;
+        while(!collectCanvas){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ControlCollectionSite.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     @Override

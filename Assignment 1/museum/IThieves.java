@@ -11,5 +11,5 @@ package museum;
  */
 public interface IThieves {
         
-    public void rollACanvas();
+    public int rollACanvas(int id, int RId);
 }

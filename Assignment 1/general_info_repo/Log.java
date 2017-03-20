@@ -180,6 +180,10 @@ public class Log {
         this.heist.setMuseumRoomsDistance(id, dt);
     }
     
+    public synchronized void printLine(){
+        this.printStatesLine();
+    }
+    
     private void printStatesLine(){
         pw.print(this.heist.getMasterState());
         pw.print(" ");

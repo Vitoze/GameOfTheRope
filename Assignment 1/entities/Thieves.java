@@ -62,6 +62,9 @@ public class Thieves extends Thread {
     public void run(){
         boolean heistOver = false;
         boolean hasCanvas = false;
+        int canvas = 0;
+        int party1_room = 0;
+        int party2_room = 0;
         int party = 0;
         while(!heistOver){
             switch(this.state){
@@ -85,31 +88,49 @@ public class Thieves extends Thread {
                 case CRAWLING_INWARDS:
                     switch(party){
                         case 1:
-                            this.party1.waitForSendAssaultParty(this.id, this.md);
+                            party1_room=this.party1.waitForSendAssaultParty(this.id, this.md);
                             while(!party1.atMuseum(this.id)){
-                                this.party1.crawlIn();
-                                this.party1.waitForMember();
+                                this.party1.crawlIn(this.id);
+                                this.party1.waitForMember(this.id);
                             }
                             break;
                         case 2:
-                            this.party2.waitForSendAssaultParty(this.id, this.md);
+                            party2_room=this.party2.waitForSendAssaultParty(this.id, this.md);
                             while(!party2.atMuseum(this.id)){
-                                this.party2.crawlIn();
-                                this.party2.waitForMember();
+                                this.party2.crawlIn(this.id);
+                                this.party2.waitForMember(this.id);
                             }
                             break;
                     }
                     this.state = ThievesState.AT_A_ROOM;
                     break;
                 case AT_A_ROOM:
-                    this.museum.rollACanvas();
+                    switch(party){
+                        case 1:
+                            canvas = this.museum.rollACanvas(this.id,party1_room);
+                            break;
+                        case 2:
+                            canvas = this.museum.rollACanvas(this.id,party2_room);
+                            break;
+                    }
                     this.state = ThievesState.CRAWLING_OUTWARDS;
                     break;
                 case CRAWLING_OUTWARDS:
-                    this.party1.waitForReverseDirection();
-                    while(!party1.atConcentration()){
-                        this.party1.crawlOut();
-                        this.party1.waitForMember();
+                    switch(party){
+                        case 1:
+                            this.party1.waitForReverseDirection();
+                            while(!party1.atConcentration()){
+                                this.party1.crawlOut();
+                                this.party1.waitForMember(this.id);
+                            }
+                            break;
+                        case 2:
+                            this.party2.waitForReverseDirection();
+                            while(!party2.atConcentration()){
+                                this.party2.crawlOut();
+                                this.party2.waitForMember(this.id);
+                            }
+                            break;
                     }
                     hasCanvas = true;
                     this.state = ThievesState.OUTSIDE;
