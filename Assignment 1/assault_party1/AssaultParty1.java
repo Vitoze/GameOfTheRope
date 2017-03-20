@@ -5,8 +5,8 @@
  */
 package assault_party1;
 
-import entities.Thieves;
-import general_info_repo.Heist;
+import general_info_repo.Log;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,14 +16,29 @@ import java.util.logging.Logger;
  */
 public class AssaultParty1 implements IMaster, IThieves{
     private boolean partyReady = false;
-    private Thieves[] party;
+    private int roomId;
+    private int roomDistance = 0;
+    private HashMap<Integer,Integer> partyElemPos;
+    private HashMap<Integer,Integer> partyElem;
     
     public AssaultParty1(){
-        
+        partyElemPos = new HashMap<>();
+        partyElem = new HashMap<>();
     }
     
     @Override
-    public synchronized void waitForSendAssaultParty() {
+    public synchronized void waitForSendAssaultParty(int id, int md) {
+        if(this.partyElem.containsKey(id)){
+            this.partyElem.replace(id, md);
+        }else{
+            this.partyElem.put(id, md);
+        }
+        if(this.partyElemPos.containsKey(id)){
+            this.partyElemPos.replace(id, 0);
+        }else{
+            this.partyElemPos.put(id, 0);
+        }
+        
         partyReady = false;
         while(!this.partyReady){
             try {
@@ -35,28 +50,30 @@ public class AssaultParty1 implements IMaster, IThieves{
     }
     
     @Override
-    public synchronized void sendAssaultParty() {
+    public synchronized void sendAssaultParty(int RId, int dt) {
         partyReady = true;
+        roomId = RId;
+        roomDistance = dt;
         notifyAll();
     }
-
+    
     @Override
-    public void crawlIn() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public synchronized boolean atMuseum(int id) {
+        return partyElemPos.get(id) >= roomDistance;
     }
 
     @Override
-    public void crawlOut() {
+    public synchronized void crawlIn() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public void waitForMember() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public boolean atMuseum() {
+    public void crawlOut() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

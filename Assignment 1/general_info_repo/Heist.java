@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package general_info_repo;
 
@@ -27,7 +25,7 @@ public class Heist {
     private final HashMap<Integer, Integer> assault_party2_pos;
     private final HashMap<Integer, Integer> assault_party1_cv;
     private final HashMap<Integer, Integer> assault_party2_cv;
-    private final HashMap<Integer, Room> museum;
+    private final HashMap<Integer, Integer> museum_rooms_distance;
     private int assault_party1_Rid;
     private int assault_party2_Rid;
     private MasterState master_state;
@@ -46,26 +44,34 @@ public class Heist {
         this.assault_party2_cv = new HashMap<>();
         this.assault_party1_Rid = 0;
         this.assault_party2_Rid = 0;
-        this.museum = new HashMap<>();
+        this.museum_rooms_distance = new HashMap<>();
     }
     
+    /**
+     * The heist is a singleton.
+     * @return Heist instance, is a singleton.
+     */
     public static Heist getInstance(){
         if(instance == null){
             instance = new Heist();
         }
         return instance;
     }
-   
+ 
+    /**
+     * Set master state.
+     * @param state master state.
+     */
     public synchronized void setMasterState(MasterState state){
         this.master_state = state;
     }
     
     /**
-     * Update the thieves state
-     * @param state thief state
-     * @param id thief ID
+     * Set the thieves state.
+     * @param id thief ID.
+     * @param state thief state.
      */
-    public synchronized void setThievesState(ThievesState state, int id) {
+    public synchronized void setThievesState(int id, ThievesState state) {
         if(this.thieves_states.containsKey(id)){
             this.thieves_states.replace(id, state);
         }else{
@@ -73,6 +79,11 @@ public class Heist {
         }
     }
     
+    /**
+     * Set the thieves situation.
+     * @param id thief ID.
+     * @param s thief situation 'W' or 'P'
+     */   
     public synchronized void setThievesSituation(int id, char s) {
         if(this.thieves_situation.containsKey(id)){
             this.thieves_situation.replace(id, s);
@@ -80,7 +91,12 @@ public class Heist {
             this.thieves_situation.put(id, s);
         }
     }
-
+    
+    /**
+     * Set thieves maximum displacement.
+     * @param id thief ID.
+     * @param md thief max displacement.
+     */
     public synchronized void setThievesMaxDisplacement(int id, int md) {
         if(this.thieves_maxDisplacement.containsKey(id)){
             this.thieves_maxDisplacement.replace(id, md);
@@ -136,7 +152,8 @@ public class Heist {
     public synchronized int getAssaultParty2ElemCv(int i) {
         return this.assault_party2_cv.get(i);
     }
-
+    
+    /*
     public synchronized int getRoomPaintings(int i) {
         return this.museum.get(i).getPaintings(i);
     }
@@ -155,5 +172,17 @@ public class Heist {
             }
         }
     }
+    */
 
+    public synchronized void setMuseumRoomsDistance(int id, int dt) {
+        if(this.museum_rooms_distance.containsKey(id)){
+            this.museum_rooms_distance.replace(id, dt);
+        }else{
+            this.museum_rooms_distance.put(id, dt);
+        }
+    }
+    
+    public synchronized int getMuseumRoomDistance(int id){
+        return this.museum_rooms_distance.get(id);
+    }
 }

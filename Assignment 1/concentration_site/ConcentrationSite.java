@@ -5,8 +5,6 @@
  */
 package concentration_site;
 
-import entities.Master;
-import entities.Thieves;
 import general_info_repo.Heist;
 import java.util.LinkedList;
 import java.util.logging.Level;
@@ -20,33 +18,47 @@ public class ConcentrationSite implements IMaster, IThieves {
     private boolean callAssault = false;
     private boolean thievesReady = false;
     private int orders = -1;
-    private int counter = 0;
-    private final LinkedList<Thieves> thieves;
-    private final Master master;
+    private int counter1 = 0;
+    private int counter2 = 0;
+    private final LinkedList<Integer> thieves;
 
-    public ConcentrationSite(LinkedList<Thieves> thieves, Master master) {
-        this.thieves = thieves;
-        this.master = master;
+    public ConcentrationSite() {
+        thieves = new LinkedList<>();
     }
     
     @Override
     public synchronized void prepareAssaultParty() {
+        this.callAssault = false;
+        while(thieves.size()<3 && counter1!=0 && counter2!=0){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ConcentrationSite.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         this.callAssault = true;
         this.orders = 0;
         notifyAll();
-        this.callAssault = false;
     }
 
     /**
      * The thieves are sleeping in this method waiting for the master inform
      * the next assault.
+     * @param id
+     * @param party
      * @return order
      */
     @Override
-    public synchronized int amINeeded() {
-        this.callAssault = false;
-        
-        while(!this.callAssault && this.counter>=3){
+    public synchronized int amINeeded(int id, int party) {
+        thieves.add(id);
+        if(party==1){
+            counter1--;
+            notifyAll();
+        }else if(party==2){
+            counter2--;
+            notifyAll();
+        }
+        while(!this.callAssault && thieves.getFirst()!=id){
             try {
                 wait();
             } catch (InterruptedException ex) {
@@ -57,14 +69,21 @@ public class ConcentrationSite implements IMaster, IThieves {
     }
 
     @Override
-    public synchronized void prepareExcursion(int id) {
-        this.counter++;
-        this.thieves.get(id-1).setSituation('P');
-        if(counter == 3){
-            this.counter = 0;
-            this.thievesReady = true;
-            notifyAll();
+    public synchronized int prepareExcursion() {
+        thieves.pop();
+        int party;
+        if(counter1<3){
+            counter1++;
+            party = 1;
+        }else{
+            counter2++;
+            party = 2;
+            if(counter2 == 3){
+                this.thievesReady = true;
+                notifyAll();
+            }
         }
+        return party;    
     }
 
     @Override

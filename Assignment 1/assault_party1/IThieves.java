@@ -14,11 +14,11 @@ public interface IThieves {
     
     public void crawlOut();
     
-    public void waitForSendAssaultParty();
+    public void waitForSendAssaultParty(int id, int md);
     
     public void waitForMember();
     
-    public boolean atMuseum();
+    public boolean atMuseum(int id);
     
     public boolean atConcentration();
     

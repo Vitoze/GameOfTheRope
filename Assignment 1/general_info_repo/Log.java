@@ -16,7 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import entities.MasterState;
 import entities.ThievesState;
-import museum.Room;
 
 /**
  * The log will be the gateway to all the information of the assault, trials,
@@ -153,6 +152,7 @@ public class Log {
      */
     public synchronized void newHeist(){
        //heist.newHeist();
+       this.printStatesLine();
     }
     
     public synchronized void initMasterState(MasterState state){
@@ -161,17 +161,23 @@ public class Log {
     
     public synchronized void setMasterState(MasterState state){
         this.heist.setMasterState(state);
-        this.printStatesLine();
     }
     
+    /**
+     * Init the thief with the initial state, id, situation and maximum displacement.
+     * @param state thief state.
+     * @param id thief identification.
+     * @param s thief situation, can be W or P.
+     * @param md thief maximum displacement.
+     */
     public synchronized void initThieves(ThievesState state, int id, char s, int md) {
-        this.heist.setThievesState(state, id);
+        this.heist.setThievesState(id, state);
         this.heist.setThievesSituation(id, s);
         this.heist.setThievesMaxDisplacement(id, md);
     }
     
-    public void initMuseum(Room[] museum_rooms) {
-        this.heist.setMuseumRooms(museum_rooms);
+    public synchronized void initMuseum(int id, int dt) {
+        this.heist.setMuseumRoomsDistance(id, dt);
     }
     
     private void printStatesLine(){
@@ -214,12 +220,16 @@ public class Log {
         }
         pw.print(" ");
         for(int i = 1; i<=5; i++){
-            pw.print(this.heist.getRoomPaintings(i));
+            //pw.print(this.heist.getRoomPaintings(i));
             pw.print(" ");
-            pw.print(this.heist.getRoomDistance(i));
+            //pw.print(this.heist.getRoomDistance(i));
             pw.print(" ");
         }
         pw.flush();      
+    }
+
+    public int getRoomDistance(int roomId) {
+        return this.heist.getMuseumRoomDistance(roomId);
     }
     
 }

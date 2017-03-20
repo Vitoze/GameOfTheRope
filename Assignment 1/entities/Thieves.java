@@ -15,6 +15,7 @@ public class Thieves extends Thread {
     private final concentration_site.IThieves concentration;
     private final control_collect_site.IThieves collect;
     private final assault_party1.IThieves party1;
+    private final assault_party2.IThieves party2;
     private final Log log;
     
     private int id;
@@ -28,11 +29,12 @@ public class Thieves extends Thread {
         this.concentration = concentration;
         this.collect = collect;
         this.party1 = party1;
+        this.party2 = party2;
         this.log = Log.getInstance();
         this.s = 'W';
         this.md = md;
         this.setName("Thief"+this.id);
-        state= ThievesState.OUTSIDE;
+        state = ThievesState.OUTSIDE;
         
         this.log.initThieves(this.state,this.id, this.s, this.md);
     }
@@ -60,6 +62,7 @@ public class Thieves extends Thread {
     public void run(){
         boolean heistOver = false;
         boolean hasCanvas = false;
+        int party = 0;
         while(!heistOver){
             switch(this.state){
                 case OUTSIDE:
@@ -67,11 +70,11 @@ public class Thieves extends Thread {
                         this.collect.handACanvas();
                         hasCanvas = false;
                     }
-                    switch(this.concentration.amINeeded()){
+                    switch(this.concentration.amINeeded(this.id, party)){
                         case -1:
                             break;
                         case 0:
-                            this.concentration.prepareExcursion(this.id);
+                            party = this.concentration.prepareExcursion();
                             this.state = ThievesState.CRAWLING_INWARDS;
                             break;
                         case 1:
@@ -80,10 +83,21 @@ public class Thieves extends Thread {
                     }
                     break;
                 case CRAWLING_INWARDS:
-                    this.party1.waitForSendAssaultParty();
-                    while(!party1.atMuseum()){
-                        this.party1.crawlIn();
-                        this.party1.waitForMember();
+                    switch(party){
+                        case 1:
+                            this.party1.waitForSendAssaultParty(this.id, this.md);
+                            while(!party1.atMuseum(this.id)){
+                                this.party1.crawlIn();
+                                this.party1.waitForMember();
+                            }
+                            break;
+                        case 2:
+                            this.party2.waitForSendAssaultParty(this.id, this.md);
+                            while(!party2.atMuseum(this.id)){
+                                this.party2.crawlIn();
+                                this.party2.waitForMember();
+                            }
+                            break;
                     }
                     this.state = ThievesState.AT_A_ROOM;
                     break;

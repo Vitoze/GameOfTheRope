@@ -23,7 +23,7 @@ public interface IMaster {
     
     public void takeARest();
     
-    public int appraiseSit();
+    public int[] appraiseSit();
     
     public void waitForPrepareExcursion();
 }

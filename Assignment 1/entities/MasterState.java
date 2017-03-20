@@ -11,7 +11,8 @@ package entities;
  */
 public enum MasterState {
     PLANNING_THE_HEIST{
-        public String tostring(){
+        @Override
+        public String toString(){
             return "PTH";
         }
     },

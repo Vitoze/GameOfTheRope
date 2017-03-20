@@ -41,16 +41,17 @@ public class Master extends Thread{
     @Override
     public void run(){
         boolean heistOver = false;
+        int[] rooms = {0,0,0,0};
         while(!heistOver){
             switch(this.state){
                 case PLANNING_THE_HEIST:
                     this.control.startOperations();
                     this.log.newHeist();
-                    
                     this.state = MasterState.DECIDING_WHAT_TO_DO;
                     break;
                 case DECIDING_WHAT_TO_DO:
-                    switch(this.control.appraiseSit()){
+                    rooms = this.control.appraiseSit();
+                    switch(rooms[0]){
                         case 1:
                             this.concentration.prepareAssaultParty();
                             this.state = MasterState.ASSEMBLING_A_GROUP;
@@ -63,7 +64,12 @@ public class Master extends Thread{
                     break;
                 case ASSEMBLING_A_GROUP:
                     this.concentration.waitForPrepareExcursion();
-                    this.party1.sendAssaultParty();
+                    if(rooms[3]==1){
+                        this.party1.sendAssaultParty(rooms[1], this.log.getRoomDistance(rooms[1]));
+                        this.party2.sendAssaultParty(rooms[2], this.log.getRoomDistance(rooms[2]));
+                    }else{
+                        this.party1.sendAssaultParty(rooms[1], this.log.getRoomDistance(rooms[1]));
+                    }
                     this.state = MasterState.WAINTING_FOR_GROUP_ARRIVAL;
                     break;
                 case WAINTING_FOR_GROUP_ARRIVAL:

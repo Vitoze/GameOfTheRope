@@ -3,6 +3,7 @@
  */
 package control_collect_site;
 
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,10 +11,9 @@ import java.util.logging.Logger;
  *  Control and Collection Site instance.
  *  @author João Brito
  */
-public class ControlCollectionSite implements IMaster {
+public class ControlCollectionSite implements IMaster, IThieves {
     private boolean collectCanvas = true;
-    private boolean firstAssault = true;
-    private int roomCounter = 0;
+    private LinkedList<Integer> rooms;
     
     /**
      * In Master life cycle, transition between "Planning the heist" and "Deciding what to do",
@@ -21,7 +21,12 @@ public class ControlCollectionSite implements IMaster {
      */
     @Override
     public void startOperations() {
-        
+        rooms = new LinkedList<>();
+        rooms.add(1);
+        rooms.add(2);
+        rooms.add(3);
+        rooms.add(4);
+        rooms.add(5);
     }
     
     /**
@@ -29,22 +34,31 @@ public class ControlCollectionSite implements IMaster {
      * @return 1 to prepare new assault or 2 to end heist 
      */
     @Override
-    public int appraiseSit() {
-        if(firstAssault){
-            roomCounter++;
-            firstAssault = false;
-            return 1;
+    public int[] appraiseSit() {
+        int [] decision = new int[5];
+        if(rooms.isEmpty()){
+            decision[0] = 2;
+            decision[1] = 0;
+            decision[2] = 0;
+            decision[3] = 0;
         }
-        if(collectCanvas){
-            return 1;
+        if(rooms.size() < 2){
+            decision[0] = 1;
+            decision[1] = rooms.getFirst();
+            decision[2] = 0;
+            decision[3] = 0;
         }else{
-            if(roomCounter==5){
-                return 2;
-            }else{
-                roomCounter++;
-                return 1;
-            }
+            decision[0] = 1;
+            decision[1] = rooms.get(0);
+            decision[2] = rooms.get(1);
+            decision[3] = 1;
         }
+        return decision;
+    }
+    
+    @Override
+    public void takeARest() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -68,12 +82,12 @@ public class ControlCollectionSite implements IMaster {
     }
 
     @Override
-    public void takeARest() {
+    public void waitForPrepareExcursion() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void waitForPrepareExcursion() {
+    public void handACanvas() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
        

@@ -11,7 +11,8 @@ package entities;
  */
 public enum ThievesState {
     OUTSIDE{
-        public String tostring(){
+        @Override
+        public String toString(){
             return "OUT";
         }
     },
