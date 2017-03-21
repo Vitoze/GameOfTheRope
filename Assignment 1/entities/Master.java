@@ -54,6 +54,7 @@ public class Master extends Thread{
                     switch(rooms[0]){
                         case 1:
                             this.concentration.prepareAssaultParty();
+                            this.log.setAssaultPartyAction(rooms[1],rooms[2]);
                             this.state = MasterState.ASSEMBLING_A_GROUP;
                             break;
                         case 2:
@@ -61,13 +62,12 @@ public class Master extends Thread{
                             this.state = MasterState.PRESENTING_THE_REPORT;
                             break;
                     }
-                    this.log.setAssaultPartyAction(rooms[1],rooms[2]);
                     break;
                 case ASSEMBLING_A_GROUP:
                     this.concentration.waitForPrepareExcursion();
                     if(rooms[3]==1){
                         this.party1.sendAssaultParty(rooms[1], this.log.getRoomDistance(rooms[1]));
-                        this.party2.sendAssaultParty(rooms[2], this.log.getRoomDistance(rooms[2]));
+                        //this.party2.sendAssaultParty(rooms[2], this.log.getRoomDistance(rooms[2]));
                     }else{
                         this.party1.sendAssaultParty(rooms[1], this.log.getRoomDistance(rooms[1]));
                     }

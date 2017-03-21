@@ -29,6 +29,7 @@ public class ConcentrationSite implements IMaster, IThieves {
     @Override
     public synchronized void prepareAssaultParty() {
         this.callAssault = false;
+        this.thievesReady = false;
         while(thieves.size()<3 && counter1!=0 && counter2!=0){
             try {
                 wait();
@@ -72,6 +73,7 @@ public class ConcentrationSite implements IMaster, IThieves {
     public synchronized int prepareExcursion() {
         thieves.pop();
         int party;
+        this.thievesReady = false;
         if(counter1<3){
             counter1++;
             party = 1;
@@ -88,7 +90,6 @@ public class ConcentrationSite implements IMaster, IThieves {
 
     @Override
     public synchronized void waitForPrepareExcursion() {
-        this.thievesReady = false;
         while(!this.thievesReady){
             try {
                 wait();

@@ -21,8 +21,9 @@ public class Museum implements IThieves{
         museum = new Room[5];
         for(int i=0; i<Heist.N_ROOMS; i++){
             Random rand = new Random();
-            int dt = rand.nextInt(30) + 15;
-            int np = rand.nextInt(16) + 8;
+            //random.nextInt(max + 1 - min) + min
+            int dt = rand.nextInt(16) + 15;
+            int np = rand.nextInt(9) + 8;
             museum[i] = new Room(i+1,dt,np);
             log.initMuseum(i+1,dt,np);
         }

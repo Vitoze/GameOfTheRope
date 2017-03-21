@@ -10,7 +10,7 @@ package assault_party2;
  * @author João Brito
  */
 public interface IThieves {
-    public int crawlIn(int id);
+    public void crawlIn(int id);
     
     public void crawlOut();
     

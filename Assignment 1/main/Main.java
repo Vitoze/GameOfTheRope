@@ -46,7 +46,7 @@ public class Main {
         thieves = new Thieves[nThieves];
         for(int i = 0; i<nThieves; i++){
             Random rand = new Random();
-            int md = rand.nextInt(6) + 2;
+            int md = rand.nextInt(5) + 2;
             thieves[i] = new Thieves(i+1,md,(museum.IThieves) museum, (assault_party1.IThieves) party1, (assault_party2.IThieves) party2, (concentration_site.IThieves) concentration, (control_collect_site.IThieves) control);
         }
         

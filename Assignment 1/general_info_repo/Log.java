@@ -151,7 +151,6 @@ public class Log {
      *  This method will be called on the start of the heist
      */
     public synchronized void newHeist(){
-       //heist.newHeist();
        this.printStatesLine();
     }
     
@@ -196,7 +195,6 @@ public class Log {
         this.heist.setAssaultParty1ElemId(id);
         this.heist.setAssaultParty1ElemPos(id, 0);
         this.heist.setAssaultParty1ElemCv(id, 0);
-        //this.printAssaultLine();
     }
     
     public synchronized void updateAssaultParty1MemberState(int id, int pos, int cv){
@@ -209,7 +207,6 @@ public class Log {
         this.heist.setAssaultParty2ElemId(id);
         this.heist.setAssaultParty2ElemPos(id, 0);
         this.heist.setAssaultParty2ElemCv(id, 0);
-        //this.printAssaultLine();
     }
     
     public synchronized void updateAssaultParty2MemberState(int id, int pos, int cv){
