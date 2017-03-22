@@ -147,30 +147,16 @@ public class Heist {
         return this.assault_party1_id[i-1];
     }
     
-    public synchronized void setAssaultParty1ElemId(int id){
-        if(nElemParty1==3){
-            nElemParty1 = 0;
-            this.assault_party1_id[nElemParty1] = id;
-            nElemParty1++;
-        }else{
-            this.assault_party1_id[nElemParty1] = id;
-            nElemParty1++;
-        }
+    public synchronized void setAssaultParty1ElemId(int id, int nElemParty){
+        this.assault_party1_id[nElemParty] = id;
     }
     
     public synchronized int getAssaultParty2ElemId(int i) {
         return this.assault_party2_id[i-1];
     }
     
-    public synchronized void setAssaultParty2ElemId(int id){
-        if(nElemParty2==3){
-            nElemParty2 = 0;
-            this.assault_party2_id[nElemParty2] = id;
-            nElemParty2++;
-        }else{
-            this.assault_party2_id[nElemParty2] = id;
-            nElemParty2++;
-        }
+    public synchronized void setAssaultParty2ElemId(int id, int nElemParty){
+        this.assault_party2_id[nElemParty] = id;
     }
 
     public synchronized int getAssaultParty1ElemPos(int i) {

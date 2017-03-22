@@ -40,19 +40,22 @@ public class AssaultParty2 implements IMaster, IThieves{
             partyElemId[nElemParty] = id;
             partyReady=false;
             first = true;
-            nElemParty++;
         }else{
             partyElemId[nElemParty] = id;
-            nElemParty++;
         }
+        this.log.setAssaultParty2MemberState(id, nElemParty);
+        nElemParty++;
+        
         if(!this.partyElem.containsKey(id)){
             this.partyElem.put(id, md);
         }
         if(!this.partyElemPos.containsKey(id)){
             this.partyElemPos.put(id, 0);
+        }else{
+            this.partyElemPos.replace(id, 0);
         }
-        
-        while(!this.partyReady && nElemParty<3){
+        System.out.println("Waiting");
+        while(!this.partyReady || nElemParty<3){
             try {
                 wait();
             } catch (InterruptedException ex) {

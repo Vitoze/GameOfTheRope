@@ -8,6 +8,8 @@ package museum;
 import general_info_repo.Heist;
 import general_info_repo.Log;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  *
  * @author João Brito
@@ -31,6 +33,14 @@ public class Museum implements IThieves{
 
     @Override
     public synchronized int rollACanvas(int id, int rid) {
+        boolean no = true;
+        while(no){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Museum.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         if(museum[rid].getPaintings()>0){
             museum[rid].setPaintings(museum[rid].getPaintings()-1);
             return 1;

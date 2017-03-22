@@ -191,8 +191,8 @@ public class Log {
         this.heist.setAssaultParty2Rid(rid2);
     }
     
-    public synchronized void setAssaultParty1MemberState(int id){
-        this.heist.setAssaultParty1ElemId(id);
+    public synchronized void setAssaultParty1MemberState(int id, int nElemParty){
+        this.heist.setAssaultParty1ElemId(id, nElemParty);
         this.heist.setAssaultParty1ElemPos(id, 0);
         this.heist.setAssaultParty1ElemCv(id, 0);
     }
@@ -203,8 +203,8 @@ public class Log {
         this.printAssaultLine();
     }
     
-    public synchronized void setAssaultParty2MemberState(int id){
-        this.heist.setAssaultParty2ElemId(id);
+    public synchronized void setAssaultParty2MemberState(int id, int nElemParty){
+        this.heist.setAssaultParty2ElemId(id, nElemParty);
         this.heist.setAssaultParty2ElemPos(id, 0);
         this.heist.setAssaultParty2ElemCv(id, 0);
     }

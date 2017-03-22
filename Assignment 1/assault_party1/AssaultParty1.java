@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 public class AssaultParty1 implements IMaster, IThieves{
     private boolean partyReady = false;
     private boolean partyBack = false;
+    private boolean next = true;
     private boolean first = true;
     private int lastElemToCrawl = 0;
     private int nextElemToCrawl = 0;
@@ -40,19 +41,23 @@ public class AssaultParty1 implements IMaster, IThieves{
             partyElemId[nElemParty] = id;
             partyReady=false;
             first = true;
-            nElemParty++;
+            notifyAll();
         }else{
             partyElemId[nElemParty] = id;
-            nElemParty++;
         }
+        System.out.println("Party "+" "+id+" "+nElemParty);
+        this.log.setAssaultParty1MemberState(id, nElemParty);
+        nElemParty++;
+        notifyAll();
         if(!this.partyElem.containsKey(id)){
             this.partyElem.put(id, md);
         }
         if(!this.partyElemPos.containsKey(id)){
             this.partyElemPos.put(id, 0);
+        }else{
+            this.partyElemPos.replace(id, 0);
         }
-        
-        while(!this.partyReady && nElemParty<3){
+        while(!this.partyReady){
             try {
                 wait();
             } catch (InterruptedException ex) {
@@ -67,7 +72,16 @@ public class AssaultParty1 implements IMaster, IThieves{
         partyReady = true;
         roomId = RId;
         roomDistance = dt;
+        while(this.nElemParty<3){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         this.nextElemToCrawl = this.partyElemId[0];
+        notifyAll();
+        System.out.println("Primeiro elemento " + nextElemToCrawl);
         this.lastElemToCrawl = this.partyElemId[2];
         notifyAll();
     }
@@ -79,21 +93,22 @@ public class AssaultParty1 implements IMaster, IThieves{
 
     @Override
     public synchronized void waitForMember(int id) {
-        while(nElemParty!=3){
-            while(id!=this.nextElemToCrawl){
-                try {
-                    wait();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        boolean no = true;
+        while(id!=this.nextElemToCrawl){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        System.out.println(id+" "+nextElemToCrawl);
+        next = false;
     }
     
     @Override
     public synchronized void crawlIn(int id) {
         // If pos(id)+md>pos(id-1)+3
-        int nextPosition = 0;
+        int nextPosition;
         if(first){
             this.log.printALine();
             first = false;
@@ -104,35 +119,63 @@ public class AssaultParty1 implements IMaster, IThieves{
             if(nextPosition > roomDistance){
                 nextPosition = roomDistance;
             }
+            this.lastElemToCrawl = id;
             setNextElemToCrawl(id);
+            //notifyAll();
         }else{
-            if(this.partyElemPos.get(id)+this.partyElem.get(id)==this.partyElemPos.get(this.lastElemToCrawl)+3){
-                nextPosition = this.partyElemPos.get(this.lastElemToCrawl)+2;
+            if(this.partyElemPos.get(id)+this.partyElem.get(id)==this.partyElemPos.get(this.lastElemToCrawl)){
+                if(this.partyElemPos.get(this.lastElemToCrawl) == roomDistance){
+                    nextPosition = roomDistance;
+                    setNextElemToCrawl(id);
+                }else{
+                    nextPosition = this.partyElemPos.get(this.lastElemToCrawl)-1;
+                }
+            }else{
+                nextPosition = this.partyElemPos.get(id)+this.partyElem.get(id);
+                nextPosition = checkPosition(nextPosition,id);
                 if(nextPosition > roomDistance){
                     nextPosition = roomDistance;
                     setNextElemToCrawl(id);
-                }   
-            }else{
-                nextPosition = this.partyElemPos.get(id)+this.partyElem.get(id);
+                }
             }
         }
+        System.out.println(id + " " + nextPosition + " " + nextElemToCrawl);
         this.partyElemPos.replace(id,nextPosition);
-        this.log.updateAssaultParty1MemberState(id, nextPosition, 0);
-        notifyAll();
+        this.log.updateAssaultParty1MemberState(id, this.partyElemPos.get(id), 0);
+        next = true;
+        //notifyAll();
     }
     
     private synchronized void setNextElemToCrawl(int id){
         for(int i=0; i<3; i++){
             if(this.partyElemId[i]==id){
                 if(i<2){
-                    int next = i++;
-                    this.nextElemToCrawl = this.partyElemId[next];
+                    this.nextElemToCrawl = this.partyElemId[++i];
                 }else{
                     this.nextElemToCrawl = this.partyElemId[0];
                 }
                 break;
             }
         }
+        notifyAll();
+        System.out.println("here"+nextElemToCrawl);
+    }
+    
+    private int checkPosition(int pos, int id){
+        int[] tmp = this.partyElemId;
+        int checkPos = 0;
+        for(int i=0; i<3; i++){
+            if(tmp[i]!=id){
+                if(tmp[i]!=this.lastElemToCrawl){
+                    checkPos = tmp[i];
+                    break;
+                }
+            }
+        }
+        if(pos==this.partyElemPos.get(checkPos)){
+            pos=this.partyElemPos.get(checkPos)-1;
+        }
+        return pos;
     }
 
     @Override

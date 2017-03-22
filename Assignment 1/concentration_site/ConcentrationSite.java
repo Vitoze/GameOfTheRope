@@ -30,7 +30,7 @@ public class ConcentrationSite implements IMaster, IThieves {
     public synchronized void prepareAssaultParty() {
         this.callAssault = false;
         this.thievesReady = false;
-        while(thieves.size()<3 && counter1!=0 && counter2!=0){
+        while(thieves.size()<3 || counter1!=0 || counter2!=0){
             try {
                 wait();
             } catch (InterruptedException ex) {
@@ -52,6 +52,7 @@ public class ConcentrationSite implements IMaster, IThieves {
     @Override
     public synchronized int amINeeded(int id, int party) {
         thieves.add(id);
+        //System.out.println(id);
         if(party==1){
             counter1--;
             notifyAll();
@@ -59,20 +60,23 @@ public class ConcentrationSite implements IMaster, IThieves {
             counter2--;
             notifyAll();
         }
-        while(!this.callAssault && thieves.getFirst()!=id){
+        while(!this.callAssault || thieves.getFirst()!=id){
             try {
                 wait();
             } catch (InterruptedException ex) {
                 Logger.getLogger(ConcentrationSite.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        //System.out.println(id);
         return this.orders;
     }
 
     @Override
     public synchronized int prepareExcursion() {
         thieves.pop();
+        notifyAll();
         int party;
+        //System.out.println("Gone");
         this.thievesReady = false;
         if(counter1<3){
             counter1++;
@@ -82,7 +86,7 @@ public class ConcentrationSite implements IMaster, IThieves {
             party = 2;
             if(counter2 == 3){
                 this.thievesReady = true;
-                notifyAll();
+                notify();
             }
         }
         return party;    

@@ -88,7 +88,6 @@ public class Thieves extends Thread {
                 case CRAWLING_INWARDS:
                     switch(party){
                         case 1:
-                            this.log.setAssaultParty1MemberState(this.id);
                             party1_room=this.party1.waitForSendAssaultParty(this.id, this.md);
                             while(!party1.atMuseum(this.id)){
                                 this.party1.waitForMember(this.id);
@@ -96,7 +95,6 @@ public class Thieves extends Thread {
                             }
                             break;
                         case 2:
-                            this.log.setAssaultParty2MemberState(this.id);
                             party2_room=this.party2.waitForSendAssaultParty(this.id, this.md);
                             while(!party2.atMuseum(this.id)){
                                 this.party2.waitForMember(this.id);
