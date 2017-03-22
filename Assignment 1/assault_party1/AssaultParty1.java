@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 public class AssaultParty1 implements IMaster, IThieves{
     private boolean partyReady = false;
     private boolean partyBack = false;
-    private boolean next = true;
     private boolean first = true;
     private int lastElemToCrawl = 0;
     private int nextElemToCrawl = 0;
@@ -45,7 +44,7 @@ public class AssaultParty1 implements IMaster, IThieves{
         }else{
             partyElemId[nElemParty] = id;
         }
-        System.out.println("Party "+" "+id+" "+nElemParty);
+        //System.out.println("Party "+" "+id+" "+nElemParty);
         this.log.setAssaultParty1MemberState(id, nElemParty);
         nElemParty++;
         notifyAll();
@@ -81,7 +80,7 @@ public class AssaultParty1 implements IMaster, IThieves{
         }
         this.nextElemToCrawl = this.partyElemId[0];
         notifyAll();
-        System.out.println("Primeiro elemento " + nextElemToCrawl);
+        //System.out.println("Primeiro elemento " + nextElemToCrawl);
         this.lastElemToCrawl = this.partyElemId[2];
         notifyAll();
     }
@@ -93,7 +92,6 @@ public class AssaultParty1 implements IMaster, IThieves{
 
     @Override
     public synchronized void waitForMember(int id) {
-        boolean no = true;
         while(id!=this.nextElemToCrawl){
             try {
                 wait();
@@ -101,8 +99,7 @@ public class AssaultParty1 implements IMaster, IThieves{
                 Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println(id+" "+nextElemToCrawl);
-        next = false;
+        //System.out.println(id+" "+nextElemToCrawl);
     }
     
     @Override
@@ -139,10 +136,9 @@ public class AssaultParty1 implements IMaster, IThieves{
                 }
             }
         }
-        System.out.println(id + " " + nextPosition + " " + nextElemToCrawl);
+        //System.out.println(id + " " + nextPosition + " " + nextElemToCrawl);
         this.partyElemPos.replace(id,nextPosition);
         this.log.updateAssaultParty1MemberState(id, this.partyElemPos.get(id), 0);
-        next = true;
         //notifyAll();
     }
     
@@ -158,7 +154,7 @@ public class AssaultParty1 implements IMaster, IThieves{
             }
         }
         notifyAll();
-        System.out.println("here"+nextElemToCrawl);
+        //System.out.println("here"+nextElemToCrawl);
     }
     
     private int checkPosition(int pos, int id){
