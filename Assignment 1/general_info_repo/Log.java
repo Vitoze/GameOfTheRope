@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed systems
  */
 package general_info_repo;
 
@@ -176,9 +174,17 @@ public class Log {
         this.heist.setThievesMaxDisplacement(id, md);
     }
     
+    public synchronized int getThiefMaxDisplacement(int id){
+        return this.heist.getThiefMaxDisplacement(id);
+    }
+    
     public synchronized void setThiefState(ThievesState state, int id){
         this.heist.setThievesState(id, state);
         this.printStatesLine();
+    }
+    
+    public synchronized void updateThiefSituation(int id, char s){
+        this.heist.setThievesSituation(id, s);
     }
     
     public synchronized void initMuseum(int id, int dt, int np) {
@@ -186,35 +192,57 @@ public class Log {
         this.heist.setMuseumRoomsPaintings(id, np);
     }
     
+    public synchronized void updateMuseum(int rid, int np){
+        this.heist.setMuseumRoomsPaintings(rid, np);
+        this.printAssaultLine();
+    }
+    
+    public synchronized int getMuseumPaintings(int rid){
+        return this.heist.getMuseumRoomPaintings(rid);
+    }
+    
+    public int getRoomDistance(int roomId) {
+        return this.heist.getMuseumRoomDistance(roomId);
+    }
+    
+    public synchronized void setAssaultPartyMember(int party, int i, int id){
+        this.heist.setAssaultPartyElemId(party, i, id);
+        this.heist.setAssaultPartyElemPos(id, 0);
+        this.heist.setAssaultPartyElemNumber(id, i);
+        this.heist.setAssaultPartyElemCv(id, 0);
+    }
+    
+    public synchronized int getAssaultPartyElemNumber(int id){
+        return this.heist.getAssaultPartyElemNumber(id);
+    }
+    
+    public synchronized int getAssaultPartyElemId(int party, int i){
+        return this.heist.getAssaultPartyElemId(party, i);
+    }
+    
+    public synchronized int getAssaultPartyElemPosition(int id){
+        return this.heist.getAssaultPartyElemPos(id);
+    }
+    
+    public synchronized void updateAssautPartyElemPosition(int id, int pos){
+        this.heist.setAssaultPartyElemPos(id, pos);
+        this.printAssaultLine();
+    }
+    
+    public synchronized int getAssaultPartyElemCv(int party, int i){
+        return this.heist.getAssaultPartyElemCv(party, i);
+    }
+    
+    public synchronized void updateAssaultPartyElemCv(int id, int cv){
+        this.heist.setAssaultPartyElemCv(id, cv);
+        this.printAssaultLine();
+    }
+    
     public synchronized void setAssaultPartyAction(int rid1, int rid2){
         this.heist.setAssaultParty1Rid(rid1);
         this.heist.setAssaultParty2Rid(rid2);
     }
-    
-    public synchronized void setAssaultParty1MemberState(int id, int nElemParty){
-        this.heist.setAssaultParty1ElemId(id, nElemParty);
-        this.heist.setAssaultParty1ElemPos(id, 0);
-        this.heist.setAssaultParty1ElemCv(id, 0);
-    }
-    
-    public synchronized void updateAssaultParty1MemberState(int id, int pos, int cv){
-        this.heist.setAssaultParty1ElemPos(id, pos);
-        this.heist.setAssaultParty1ElemCv(id, cv);
-        this.printAssaultLine();
-    }
-    
-    public synchronized void setAssaultParty2MemberState(int id, int nElemParty){
-        this.heist.setAssaultParty2ElemId(id, nElemParty);
-        this.heist.setAssaultParty2ElemPos(id, 0);
-        this.heist.setAssaultParty2ElemCv(id, 0);
-    }
-    
-    public synchronized void updateAssaultParty2MemberState(int id, int pos, int cv){
-        this.heist.setAssaultParty2ElemPos(id, pos);
-        this.heist.setAssaultParty2ElemCv(id, cv);
-        this.printAssaultLine();
-    }
-    
+  
     public synchronized void printLine(){
         this.printStatesLine();
     }
@@ -244,22 +272,22 @@ public class Log {
         pw.print(this.heist.getAssaultParty1Rid());
         pw.print(" ");
         for(int i = 1; i<=3; i++){
-            pw.print(this.heist.getAssaultParty1ElemId(i));
+            pw.print(this.heist.getAssaultPartyElemId(1, i));
             pw.print(" ");
-            pw.print(this.heist.getAssaultParty1ElemPos(i));
+            pw.print(this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(1, i)));
             pw.print(" ");
-            pw.print(this.heist.getAssaultParty1ElemCv(i));
+            pw.print(this.heist.getAssaultPartyElemCv(1, i));
             pw.print(" ");
         }
         pw.print(" ");
         pw.print(this.heist.getAssaultParty2Rid());
         pw.print(" ");
         for(int i = 1; i<=3; i++){
-            pw.print(this.heist.getAssaultParty2ElemId(i));
+            pw.print(this.heist.getAssaultPartyElemId(2, i));
             pw.print(" ");
-            pw.print(this.heist.getAssaultParty2ElemPos(i));
+            pw.print(this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(2, i)));
             pw.print(" ");
-            pw.print(this.heist.getAssaultParty2ElemCv(i));
+            pw.print(this.heist.getAssaultPartyElemCv(2, i));
             pw.print(" ");
         }
         pw.print(" ");
@@ -272,9 +300,11 @@ public class Log {
         pw.println();
         pw.flush();      
     }
-
-    public int getRoomDistance(int roomId) {
-        return this.heist.getMuseumRoomDistance(roomId);
+    
+    public void printResults(){
+        pw.print("My friends, tonight's effort produced "+this.heist.getTotalPaintings()+" priceless paintings!");
+        pw.println();
+        pw.flush();
     }
     
 }

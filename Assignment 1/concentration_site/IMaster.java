@@ -11,8 +11,10 @@ package concentration_site;
  */
 public interface IMaster {
 
-    public void prepareAssaultParty();
+    public void prepareAssaultParty(int last);
     
     public void waitForPrepareExcursion();
+    
+    public void sumUpResults();
     
 }

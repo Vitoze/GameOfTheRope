@@ -40,22 +40,6 @@ public class Thieves extends Thread {
     }
     
     /**
-     * Get thief ID
-     * @return thief ID
-     */
-    public int getID(){
-        return this.id;
-    }
-    
-    /**
-     * Set thief situation 'W' or 'P'
-     * @param s thief situation 
-     */
-    public void setSituation(char s){
-        this.s = s;
-    }
-    
-    /**
      * This function represents the life cycle of Thieves
      */         
     @Override
@@ -63,21 +47,21 @@ public class Thieves extends Thread {
         boolean heistOver = false;
         boolean hasCanvas = false;
         int canvas = 0;
-        int party1_room = 0;
-        int party2_room = 0;
+        int party_room = 0;
         int party = 0;
         while(!heistOver){
             switch(this.state){
                 case OUTSIDE:
                     if(hasCanvas){
-                        this.collect.handACanvas();
+                        this.collect.handACanvas(this.id, party_room, canvas);
                         hasCanvas = false;
                     }
                     switch(this.concentration.amINeeded(this.id, party)){
                         case -1:
                             break;
                         case 0:
-                            party = this.concentration.prepareExcursion();
+                            party = this.concentration.prepareExcursion(this.id);
+                            this.log.updateThiefSituation(this.id, 'P');
                             this.state = ThievesState.CRAWLING_INWARDS;
                             break;
                         case 1:
@@ -88,14 +72,14 @@ public class Thieves extends Thread {
                 case CRAWLING_INWARDS:
                     switch(party){
                         case 1:
-                            party1_room=this.party1.waitForSendAssaultParty(this.id, this.md);
+                            party_room=this.party1.waitForSendAssaultParty(this.id, this.md);
                             while(!party1.atMuseum(this.id)){
                                 this.party1.waitForMember(this.id);
                                 this.party1.crawlIn(this.id);
                             }
                             break;
                         case 2:
-                            party2_room=this.party2.waitForSendAssaultParty(this.id, this.md);
+                            party_room=this.party2.waitForSendAssaultParty(this.id, this.md);
                             while(!party2.atMuseum(this.id)){
                                 this.party2.waitForMember(this.id);
                                 this.party2.crawlIn(this.id);
@@ -107,32 +91,34 @@ public class Thieves extends Thread {
                 case AT_A_ROOM:
                     switch(party){
                         case 1:
-                            canvas = this.museum.rollACanvas(this.id,party1_room);
+                            canvas = this.museum.rollACanvas(this.id,party_room);
                             break;
                         case 2:
-                            canvas = this.museum.rollACanvas(this.id,party2_room);
+                            canvas = this.museum.rollACanvas(this.id,party_room);
                             break;
                     }
+                    this.log.updateAssaultPartyElemCv(this.id, canvas);
                     this.state = ThievesState.CRAWLING_OUTWARDS;
                     break;
                 case CRAWLING_OUTWARDS:
                     switch(party){
                         case 1:
                             this.party1.waitForReverseDirection();
-                            while(!party1.atConcentration()){
-                                this.party1.crawlOut();
+                            while(!party1.atConcentration(this.id)){
                                 this.party1.waitForMember(this.id);
+                                this.party1.crawlOut(this.id);
                             }
                             break;
                         case 2:
                             this.party2.waitForReverseDirection();
-                            while(!party2.atConcentration()){
-                                this.party2.crawlOut();
+                            while(!party2.atConcentration(this.id)){
                                 this.party2.waitForMember(this.id);
+                                this.party2.crawlOut(this.id);
                             }
                             break;
                     }
                     hasCanvas = true;
+                    this.log.updateThiefSituation(this.id, 'W');
                     this.state = ThievesState.OUTSIDE;
                     break;
             }

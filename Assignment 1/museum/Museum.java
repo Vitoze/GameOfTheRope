@@ -8,41 +8,30 @@ package museum;
 import general_info_repo.Heist;
 import general_info_repo.Log;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 /**
  *
  * @author João Brito
  */
 public class Museum implements IThieves{
-    private final Room[] museum; 
     private final Log log;
     
     public Museum(){
         this.log = Log.getInstance();
-        museum = new Room[5];
-        for(int i=0; i<Heist.N_ROOMS; i++){
+        for(int i=1; i<=Heist.N_ROOMS; i++){
             Random rand = new Random();
             //random.nextInt(max + 1 - min) + min
-            int dt = rand.nextInt(16) + 15;
-            int np = rand.nextInt(9) + 8;
-            museum[i] = new Room(i+1,dt,np);
-            log.initMuseum(i+1,dt,np);
+            int dt = rand.nextInt(Heist.N_MAX_DISTANCE+1-Heist.N_MIN_DISTANCE) + Heist.N_MIN_DISTANCE;
+            int np = rand.nextInt(Heist.N_MAX_PAINTINGS+1-Heist.N_MIN_PAINTINGS) + Heist.N_MIN_PAINTINGS;
+            log.initMuseum(i,dt,np);
+            //System.out.println(i+" "+np);
         }
     }
 
     @Override
     public synchronized int rollACanvas(int id, int rid) {
-        boolean no = true;
-        while(no){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Museum.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        if(museum[rid].getPaintings()>0){
-            museum[rid].setPaintings(museum[rid].getPaintings()-1);
+        if(log.getMuseumPaintings(rid)>0){
+            log.updateMuseum(rid, log.getMuseumPaintings(rid)-1);
+            //System.out.println("Here");
             return 1;
         }else{
             return 0;

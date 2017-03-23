@@ -4,6 +4,7 @@
 package control_collect_site;
 
 import java.util.LinkedList;
+import general_info_repo.Log;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +15,12 @@ import java.util.logging.Logger;
 public class ControlCollectionSite implements IMaster, IThieves {
     private boolean collectCanvas = false;
     private LinkedList<Integer> rooms;
+    private int nElemToWait = 0;
+    private final Log log;
+    
+    public ControlCollectionSite(){
+        log = Log.getInstance();
+    }
     
     /**
      * In Master life cycle, transition between "Planning the heist" and "Deciding what to do",
@@ -34,8 +41,8 @@ public class ControlCollectionSite implements IMaster, IThieves {
      * @return 1 to prepare new assault or 2 to end heist 
      */
     @Override
-    public int[] appraiseSit() {
-        int [] decision = new int[5];
+    public synchronized int[] appraiseSit() {
+        int [] decision = new int[4];
         if(rooms.isEmpty()){
             decision[0] = 2;
             decision[1] = 0;
@@ -53,6 +60,13 @@ public class ControlCollectionSite implements IMaster, IThieves {
             decision[2] = rooms.get(1);
             decision[3] = 1;
         }
+        
+        if(decision[3]==0){
+            this.nElemToWait = 3;
+        }else{
+            this.nElemToWait = 6;
+        }
+        System.out.println("Master1");
         return decision;
     }
     
@@ -67,35 +81,20 @@ public class ControlCollectionSite implements IMaster, IThieves {
             }
         }
     }
-
+    
     @Override
-    public boolean sumUpResults() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void updateMaster(String stat) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void sendAssaultParty() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void collectCanvas() {
-        collectCanvas=!collectCanvas;
-    }
-
-    @Override
-    public void waitForPrepareExcursion() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void handACanvas() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public synchronized void handACanvas(int id, int rid, int cv) {
+        if(cv==0){
+            if(rooms.contains(rid)){
+                rooms.remove(rid);
+            }
+        }
+        this.log.updateAssaultPartyElemCv(id, cv);
+        this.nElemToWait--;
+        if(this.nElemToWait==0){ 
+            collectCanvas = true;
+            notify();
+        }
     }
        
 }

@@ -13,6 +13,6 @@ public interface IThieves {
     
     public int amINeeded(int id, int party);
     
-    public int prepareExcursion();
+    public int prepareExcursion(int id);
     
 }

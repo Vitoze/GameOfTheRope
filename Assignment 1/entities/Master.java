@@ -53,12 +53,12 @@ public class Master extends Thread{
                     rooms = this.control.appraiseSit();
                     switch(rooms[0]){
                         case 1:
-                            this.concentration.prepareAssaultParty();
+                            this.concentration.prepareAssaultParty(rooms[3]);
                             this.log.setAssaultPartyAction(rooms[1],rooms[2]);
                             this.state = MasterState.ASSEMBLING_A_GROUP;
                             break;
                         case 2:
-                            this.control.sumUpResults();
+                            this.concentration.sumUpResults();
                             this.state = MasterState.PRESENTING_THE_REPORT;
                             break;
                     }
@@ -75,7 +75,7 @@ public class Master extends Thread{
                     break;
                 case WAINTING_FOR_GROUP_ARRIVAL:
                     this.control.takeARest();
-                    this.control.collectCanvas();
+                    //this.control.collectCanvas(rooms[3]);
                     this.state = MasterState.DECIDING_WHAT_TO_DO;
                     break;
                 case PRESENTING_THE_REPORT:

@@ -10,5 +10,7 @@ package control_collect_site;
  * @author João Brito
  */
 public interface IThieves {
-    public void handACanvas();
+    
+    public void handACanvas(int id, int rid, int cv);
+
 }

@@ -6,7 +6,6 @@ package general_info_repo;
 import entities.MasterState;
 import entities.ThievesState;
 import java.util.HashMap;
-import museum.Room;
 
 /**
  *  This heist singleton will have assaults, thieves displacements, states.
@@ -15,42 +14,40 @@ import museum.Room;
 public class Heist {
     public static final int N_THIEVES = 6;
     public static final int N_ROOMS = 5;
+    public static final int N_MIN_PAINTINGS = 8;
+    public static final int N_MAX_PAINTINGS = 16;
+    public static final int N_MIN_DISTANCE = 15;
+    public static final int N_MAX_DISTANCE = 30;
     
-    private final HashMap<Integer, Integer> thieves_maxDisplacement;
-    private final HashMap<Integer, ThievesState> thieves_states;
-    private final HashMap<Integer, Character> thieves_situation;
-    private final int[] assault_party1_id;
-    private final int[] assault_party2_id;
-    private final HashMap<Integer, Integer> assault_party1_pos;
-    private final HashMap<Integer, Integer> assault_party2_pos;
-    private final HashMap<Integer, Integer> assault_party1_cv;
-    private final HashMap<Integer, Integer> assault_party2_cv;
-    private final HashMap<Integer, Integer> museum_rooms_distance;
-    private final HashMap<Integer, Integer> museum_rooms_paintings;
+    private int totalPaintings;
     private int assault_party1_Rid;
     private int assault_party2_Rid;
-    private int nElemParty1;
-    private int nElemParty2;
     private MasterState master_state;
+    private final HashMap<Integer, Integer> assault_party_cv;
+    private final HashMap<Integer, Integer> assault_party_pos;
+    private final HashMap<Integer, ThievesState> thieves_states;
+    private final HashMap<Integer, Character> thieves_situation;
+    private final HashMap<Integer, Integer> museum_rooms_distance;
+    private final HashMap<Integer, Integer> museum_rooms_paintings;
+    private final HashMap<Integer, Integer> thieves_maxDisplacement;
+    private final HashMap<Integer, Integer> assault_party_elem_number;
+    private final HashMap<Integer, HashMap<Integer,Integer>> assault_party;
     
     private static Heist instance = null;
      
     private Heist(){
-        this.thieves_maxDisplacement = new HashMap<>();
-        this.thieves_states = new HashMap<>();
-        this.thieves_situation = new HashMap<>();
-        this.assault_party1_id = new int[3];
-        this.assault_party2_id = new int[3];
-        this.assault_party1_pos = new HashMap<>();
-        this.assault_party2_pos = new HashMap<>();
-        this.assault_party1_cv = new HashMap<>();
-        this.assault_party2_cv = new HashMap<>();
+        this.totalPaintings = 0;
         this.assault_party1_Rid = 0;
         this.assault_party2_Rid = 0;
-        this.nElemParty1 = 0;
-        this.nElemParty2 = 0;
+        this.assault_party = new HashMap<>();
+        this.thieves_states = new HashMap<>();
+        this.assault_party_cv = new HashMap<>();
+        this.thieves_situation = new HashMap<>();
+        this.assault_party_pos = new HashMap<>();
         this.museum_rooms_distance = new HashMap<>();
         this.museum_rooms_paintings = new HashMap<>();
+        this.thieves_maxDisplacement = new HashMap<>();
+        this.assault_party_elem_number = new HashMap<>();
     }
     
     /**
@@ -142,69 +139,66 @@ public class Heist {
     public synchronized void setAssaultParty2Rid(int rid) {
         this.assault_party2_Rid=rid;
     }
-
-    public synchronized int getAssaultParty1ElemId(int i) {
-        return this.assault_party1_id[i-1];
-    }
     
-    public synchronized void setAssaultParty1ElemId(int id, int nElemParty){
-        this.assault_party1_id[nElemParty] = id;
-    }
-    
-    public synchronized int getAssaultParty2ElemId(int i) {
-        return this.assault_party2_id[i-1];
-    }
-    
-    public synchronized void setAssaultParty2ElemId(int id, int nElemParty){
-        this.assault_party2_id[nElemParty] = id;
+    public synchronized int getTotalPaintings(){
+        return this.totalPaintings;
     }
 
-    public synchronized int getAssaultParty1ElemPos(int i) {
-        return this.assault_party1_pos.get(this.assault_party1_id[i-1]);
-    }
-    
-    public synchronized void setAssaultParty1ElemPos(int id, int pos) {
-        if(this.assault_party1_pos.containsKey(id)){
-            this.assault_party1_pos.replace(id, pos);
+    /**
+     * 
+     * @param party assault party number.
+     * @param i assault party element number.
+     * @param id thief identification.
+     */
+    public synchronized void setAssaultPartyElemId(int party, int i, int id){
+        if(!this.assault_party.containsKey(party)){
+            this.assault_party.put(party, new HashMap<>());
+        }
+        if(this.assault_party.get(party).containsKey(i)){
+            this.assault_party.get(party).replace(i, id);
         }else{
-            this.assault_party1_pos.put(id, pos);
+            this.assault_party.get(party).put(i, id);
         }
     }
     
-    public synchronized int getAssaultParty2ElemPos(int i) {
-        return this.assault_party2_pos.get(this.assault_party2_id[i-1]);
-    }
-    
-    public synchronized void setAssaultParty2ElemPos(int id, int pos) {
-        if(this.assault_party2_pos.containsKey(id)){
-            this.assault_party2_pos.replace(id, pos);
+    public synchronized void setAssaultPartyElemNumber(int id, int i){
+        if(this.assault_party_elem_number.containsKey(id)){
+            this.assault_party_elem_number.replace(id, i);
         }else{
-            this.assault_party2_pos.put(id, pos);
-        }
-    }
-
-    public synchronized int getAssaultParty1ElemCv(int i) {
-        return this.assault_party1_cv.get(this.assault_party1_id[i-1]);
-    }
-    
-    public synchronized void setAssaultParty1ElemCv(int id, int cv) {
-        if(this.assault_party1_cv.containsKey(id)){
-            this.assault_party1_cv.replace(id, cv);
-        }else{
-            this.assault_party1_cv.put(id, cv);
+            this.assault_party_elem_number.put(id, i);
         }
     }
     
-    public synchronized int getAssaultParty2ElemCv(int i) {
-        return this.assault_party2_cv.get(this.assault_party2_id[i-1]);
+    public synchronized void setAssaultPartyElemCv(int id, int cv){
+        if(this.assault_party_cv.containsKey(id)){
+            this.assault_party_cv.replace(id, cv);
+        }else{
+            this.assault_party_cv.put(id,cv);
+        }
     }
     
-    public synchronized void setAssaultParty2ElemCv(int id, int cv) {
-        if(this.assault_party2_cv.containsKey(id)){
-            this.assault_party2_cv.replace(id, cv);
+    public synchronized int getAssaultPartyElemNumber(int id){
+        return this.assault_party_elem_number.get(id);
+    }
+    
+    public synchronized int getAssaultPartyElemId(int party, int i) {
+        return this.assault_party.get(party).get(i);
+    }
+    
+    public synchronized void setAssaultPartyElemPos(int id, int pos){
+        if(this.assault_party_pos.containsKey(id)){
+            this.assault_party_pos.replace(id, pos);
         }else{
-            this.assault_party2_cv.put(id, cv);
+            this.assault_party_pos.put(id, pos);
         }
+    }
+    
+    public synchronized int getAssaultPartyElemPos(int id) {
+        return this.assault_party_pos.get(id);
+    }
+    
+    public synchronized int getAssaultPartyElemCv(int party, int i){
+       return this.assault_party_cv.get(this.assault_party.get(party).get(i));
     }
 
     public synchronized void setMuseumRoomsDistance(int id, int dt) {
@@ -220,6 +214,7 @@ public class Heist {
     }
     
     public synchronized void setMuseumRoomsPaintings(int id, int np) {
+        this.totalPaintings+=np;
         if(this.museum_rooms_paintings.containsKey(id)){
             this.museum_rooms_paintings.replace(id, np);
         }else{

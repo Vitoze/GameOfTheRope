@@ -4,7 +4,6 @@
 package assault_party1;
 
 import general_info_repo.Log;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,48 +13,30 @@ import java.util.logging.Logger;
  */
 public class AssaultParty1 implements IMaster, IThieves{
     private boolean partyReady = false;
-    private boolean partyBack = false;
     private boolean first = true;
+    private int counterToCrawlBack = 0;
     private int lastElemToCrawl = 0;
     private int nextElemToCrawl = 0;
     private int roomId;
     private int nElemParty = 0;
     private int roomDistance = 0;
     private final Log log;
-    private final int[] partyElemId; 
-    private final HashMap<Integer,Integer> partyElemPos;
-    private final HashMap<Integer,Integer> partyElem;
     
     public AssaultParty1(){
         this.log = Log.getInstance();
-        partyElemPos = new HashMap<>();
-        partyElem = new HashMap<>();
-        partyElemId = new int[3];
     }
     
     @Override
     public synchronized int waitForSendAssaultParty(int id, int md) {
         if(nElemParty==3){
-            nElemParty = 0;
-            partyElemId[nElemParty] = id;
             partyReady=false;
             first = true;
+            nElemParty=0;
+            counterToCrawlBack = 0;
             notifyAll();
-        }else{
-            partyElemId[nElemParty] = id;
         }
-        //System.out.println("Party "+" "+id+" "+nElemParty);
-        this.log.setAssaultParty1MemberState(id, nElemParty);
         nElemParty++;
         notifyAll();
-        if(!this.partyElem.containsKey(id)){
-            this.partyElem.put(id, md);
-        }
-        if(!this.partyElemPos.containsKey(id)){
-            this.partyElemPos.put(id, 0);
-        }else{
-            this.partyElemPos.replace(id, 0);
-        }
         while(!this.partyReady){
             try {
                 wait();
@@ -63,13 +44,14 @@ public class AssaultParty1 implements IMaster, IThieves{
                 Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        //System.out.println(id);
         return roomId;
     }
     
     @Override
-    public synchronized void sendAssaultParty(int RId, int dt) {
+    public synchronized void sendAssaultParty(int rid, int dt) {
         partyReady = true;
-        roomId = RId;
+        roomId = rid;
         roomDistance = dt;
         while(this.nElemParty<3){
             try {
@@ -78,16 +60,15 @@ public class AssaultParty1 implements IMaster, IThieves{
                 Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        this.nextElemToCrawl = this.partyElemId[0];
-        notifyAll();
+        this.nextElemToCrawl = this.log.getAssaultPartyElemId(1, 1);
         //System.out.println("Primeiro elemento " + nextElemToCrawl);
-        this.lastElemToCrawl = this.partyElemId[2];
+        this.lastElemToCrawl = this.log.getAssaultPartyElemId(1, 3);
         notifyAll();
     }
     
     @Override
     public synchronized boolean atMuseum(int id) {
-        return partyElemPos.get(id) == roomDistance;
+        return this.log.getAssaultPartyElemPosition(id) == roomDistance;
     }
 
     @Override
@@ -104,14 +85,17 @@ public class AssaultParty1 implements IMaster, IThieves{
     
     @Override
     public synchronized void crawlIn(int id) {
-        // If pos(id)+md>pos(id-1)+3
         int nextPosition;
+        int nextElemToCrawlPosition = this.log.getAssaultPartyElemPosition(id);
+        int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
+        int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(this.lastElemToCrawl);
+        // If pos(id)+md>pos(id-1)+3
         if(first){
             this.log.printALine();
             first = false;
         }
-        if(this.partyElemPos.get(id)+this.partyElem.get(id)>this.partyElemPos.get(this.lastElemToCrawl)+3){
-            nextPosition = this.partyElemPos.get(this.lastElemToCrawl)+3;
+        if(nextElemToCrawlPosition+nextElemToCrawlMaxDispl>lastElemToCrawlPosition+3){
+            nextPosition = lastElemToCrawlPosition+3;
             // If distance > roomPos
             if(nextPosition > roomDistance){
                 nextPosition = roomDistance;
@@ -120,83 +104,132 @@ public class AssaultParty1 implements IMaster, IThieves{
             setNextElemToCrawl(id);
             //notifyAll();
         }else{
-            if(this.partyElemPos.get(id)+this.partyElem.get(id)==this.partyElemPos.get(this.lastElemToCrawl)){
-                if(this.partyElemPos.get(this.lastElemToCrawl) == roomDistance){
+            if(nextElemToCrawlPosition+nextElemToCrawlMaxDispl==lastElemToCrawlPosition){
+                if(lastElemToCrawlPosition == roomDistance){
                     nextPosition = roomDistance;
+                    this.lastElemToCrawl = id;
                     setNextElemToCrawl(id);
                 }else{
-                    nextPosition = this.partyElemPos.get(this.lastElemToCrawl)-1;
+                    nextPosition = lastElemToCrawlPosition-1;
                 }
             }else{
-                nextPosition = this.partyElemPos.get(id)+this.partyElem.get(id);
+                nextPosition = nextElemToCrawlPosition+nextElemToCrawlMaxDispl;
                 nextPosition = checkPosition(nextPosition,id);
-                if(nextPosition > roomDistance){
+                if(nextPosition >= roomDistance){
                     nextPosition = roomDistance;
+                    this.lastElemToCrawl = id;
                     setNextElemToCrawl(id);
                 }
             }
         }
         //System.out.println(id + " " + nextPosition + " " + nextElemToCrawl);
-        this.partyElemPos.replace(id,nextPosition);
-        this.log.updateAssaultParty1MemberState(id, this.partyElemPos.get(id), 0);
+        this.log.updateAssautPartyElemPosition(id, nextPosition);
         //notifyAll();
     }
     
     private synchronized void setNextElemToCrawl(int id){
-        for(int i=0; i<3; i++){
-            if(this.partyElemId[i]==id){
-                if(i<2){
-                    this.nextElemToCrawl = this.partyElemId[++i];
-                }else{
-                    this.nextElemToCrawl = this.partyElemId[0];
-                }
-                break;
-            }
+        int lastToCrawl = this.log.getAssaultPartyElemNumber(id);
+        if(lastToCrawl==3){
+            lastToCrawl = 1;
+        }else{
+            lastToCrawl++;
         }
+        this.nextElemToCrawl = this.log.getAssaultPartyElemId(1,lastToCrawl);
         notifyAll();
         //System.out.println("here"+nextElemToCrawl);
     }
     
     private int checkPosition(int pos, int id){
-        int[] tmp = this.partyElemId;
-        int checkPos = 0;
-        for(int i=0; i<3; i++){
-            if(tmp[i]!=id){
-                if(tmp[i]!=this.lastElemToCrawl){
-                    checkPos = tmp[i];
+        int elem_id;
+        for(int i=1;i<=3;i++){
+            elem_id=this.log.getAssaultPartyElemId(1, i);
+            if(elem_id!=id && elem_id!=this.lastElemToCrawl){
+                if(this.log.getAssaultPartyElemPosition(elem_id)==pos){
+                    pos -= 1;
                     break;
                 }
             }
-        }
-        if(pos==this.partyElemPos.get(checkPos)){
-            pos=this.partyElemPos.get(checkPos)-1;
         }
         return pos;
     }
 
     @Override
     public synchronized void waitForReverseDirection() {
-        throw new UnsupportedOperationException("Not supported yet.");
-        /*
-        partyBack = false;
-        while(!this.partyBack){
+        this.nextElemToCrawl = this.log.getAssaultPartyElemId(1, 1);
+        this.lastElemToCrawl = this.log.getAssaultPartyElemId(1, 3);
+        counterToCrawlBack++;
+        notifyAll();
+        //System.out.println("Waiting");
+        while(counterToCrawlBack<3){
             try {
                 wait();
             } catch (InterruptedException ex) {
                 Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        */
     }
     
     @Override
-    public void crawlOut() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public synchronized boolean atConcentration(int id) {
+        return this.log.getAssaultPartyElemPosition(id) == 0;
     }
-
+    
     @Override
-    public boolean atConcentration() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public synchronized void crawlOut(int id) {
+        int nextPosition;
+        int nextElemToCrawlPosition = this.log.getAssaultPartyElemPosition(id);
+        int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
+        int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(this.lastElemToCrawl);
+        // If pos(id)+md>pos(id-1)+3
+        if(first){
+            this.log.printALine();
+            first = false;
+        }
+        if(nextElemToCrawlPosition-nextElemToCrawlMaxDispl<lastElemToCrawlPosition-3){
+            nextPosition = lastElemToCrawlPosition-3;
+            // If distance > roomPos
+            if(nextPosition < 0){
+                nextPosition = 0;
+            }
+            this.lastElemToCrawl = id;
+            setNextElemToCrawl(id);
+            //notifyAll();
+        }else{
+            if(nextElemToCrawlPosition-nextElemToCrawlMaxDispl==lastElemToCrawlPosition){
+                if(lastElemToCrawlPosition == 0){
+                    nextPosition = 0;
+                    this.lastElemToCrawl = id;
+                    setNextElemToCrawl(id);
+                }else{
+                    nextPosition = lastElemToCrawlPosition+1;
+                }
+            }else{
+                nextPosition = nextElemToCrawlPosition-nextElemToCrawlMaxDispl;
+                nextPosition = checkPositionBack(nextPosition,id);
+                if(nextPosition <= 0){
+                    nextPosition = 0;
+                    this.lastElemToCrawl = id;
+                    setNextElemToCrawl(id);
+                }
+            }
+        }
+        //System.out.println(id + " " + nextPosition + " " + nextElemToCrawl);
+        this.log.updateAssautPartyElemPosition(id, nextPosition);
+        //notifyAll();
+    }
+    
+    private int checkPositionBack(int pos, int id){
+        int elem_id;
+        for(int i=1;i<=3;i++){
+            elem_id=this.log.getAssaultPartyElemId(1, i);
+            if(elem_id!=id && elem_id!=this.lastElemToCrawl){
+                if(this.log.getAssaultPartyElemPosition(elem_id)==pos){
+                    pos += 1;
+                    break;
+                }
+            }
+        }
+        return pos;
     }
 
 }

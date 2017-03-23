@@ -11,19 +11,10 @@ package control_collect_site;
  */
 public interface IMaster {
     
-    public boolean sumUpResults();
-    
     public void startOperations();
-    
-    public void updateMaster(String stat);
-    
-    public void sendAssaultParty();
-	
-    public void collectCanvas();
     
     public void takeARest();
     
     public int[] appraiseSit();
     
-    public void waitForPrepareExcursion();
 }

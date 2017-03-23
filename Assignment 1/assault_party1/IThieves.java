@@ -12,7 +12,7 @@ package assault_party1;
 public interface IThieves {
     public void crawlIn(int id);
     
-    public void crawlOut();
+    public void crawlOut(int id);
     
     public int waitForSendAssaultParty(int id, int md);
     
@@ -20,7 +20,7 @@ public interface IThieves {
     
     public boolean atMuseum(int id);
     
-    public boolean atConcentration();
+    public boolean atConcentration(int id);
     
     public void waitForReverseDirection();
 }
