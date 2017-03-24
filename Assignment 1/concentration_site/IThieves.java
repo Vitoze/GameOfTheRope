@@ -11,7 +11,7 @@ package concentration_site;
  */
 public interface IThieves {
     
-    public int amINeeded(int id, int party);
+    public int amINeeded(int id);
     
     public int prepareExcursion(int id);
     

@@ -41,7 +41,7 @@ public class Master extends Thread{
     @Override
     public void run(){
         boolean heistOver = false;
-        int[] rooms = {0,0,0,0};
+        int[] decision = {0,0};
         while(!heistOver){
             switch(this.state){
                 case PLANNING_THE_HEIST:
@@ -50,11 +50,10 @@ public class Master extends Thread{
                     this.state = MasterState.DECIDING_WHAT_TO_DO;
                     break;
                 case DECIDING_WHAT_TO_DO:
-                    rooms = this.control.appraiseSit();
-                    switch(rooms[0]){
+                    decision = this.control.appraiseSit();
+                    switch(decision[0]){
                         case 1:
-                            this.concentration.prepareAssaultParty(rooms[3]);
-                            this.log.setAssaultPartyAction(rooms[1],rooms[2]);
+                            this.concentration.prepareAssaultParty(decision[1]);
                             this.state = MasterState.ASSEMBLING_A_GROUP;
                             break;
                         case 2:
@@ -65,11 +64,11 @@ public class Master extends Thread{
                     break;
                 case ASSEMBLING_A_GROUP:
                     this.concentration.waitForPrepareExcursion();
-                    if(rooms[3]==1){
-                        this.party1.sendAssaultParty(rooms[1], this.log.getRoomDistance(rooms[1]));
-                        this.party2.sendAssaultParty(rooms[2], this.log.getRoomDistance(rooms[2]));
+                    if(decision[1]==1){
+                        this.party1.sendAssaultParty();
+                        this.party2.sendAssaultParty();
                     }else{
-                        this.party1.sendAssaultParty(rooms[1], this.log.getRoomDistance(rooms[1]));
+                        this.party1.sendAssaultParty();
                     }
                     this.state = MasterState.WAINTING_FOR_GROUP_ARRIVAL;
                     break;

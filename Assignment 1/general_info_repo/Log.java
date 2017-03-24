@@ -79,44 +79,44 @@ public class Log {
             
             String head = "MstT";
             for(int i=1; i<=6; i++){
-                head += " Thief " + Integer.toString(i);
+                head += "   Thief " + Integer.toString(i)+"   ";
             }
             pw.println(head);
             
-            head = "Stat";
+            head = "Stat  ";
             for(int i=1; i<=6; i++){
-                head += "  Stat S MD ";
+                head += "Stat S MD    ";
             }
             pw.println(head);
-            
-            head = "Assault party 1                              Assault party 2                 Museum";
+            pw.print("                   ");
+            head = "Assault party 1                       Assault party 2                         Museum";
             pw.println(head);
             
-            head = "";
+            head = "           ";
             for(int i=1; i<=3; i++){
-                head+= " Elem " + Integer.toString(i);
+                head+= "Elem " + Integer.toString(i)+"     ";
             }
-            head += "      ";
+            head += "     ";
             for(int i=1; i<=3; i++){
-                head+= " Elem " + Integer.toString(i);
+                head+= "Elem " + Integer.toString(i)+"     ";
             }
-            head += "       ";
+            head += "";
             for(int i=1; i<=5; i++){
-                head+= " Room " + Integer.toString(i);
+                head+= "Room " + Integer.toString(i)+"  ";
             }
             pw.println(head);
             
-            head = "RId ";
+            head = "    RId  ";
             for(int i=1; i<=3; i++){
-                head+= " Id Pos Cv";
+                head+= "Id Pos Cv  ";
             }
-            head += " RId";
+            head += "RId  ";
             for(int i=1; i<=3; i++){
-                head+= " Id Pos Cv";
+                head+= "Id Pos Cv  ";
             }
             head += "  ";
             for(int i=1; i<=5; i++){
-                head+= " NP DT ";
+                head+= " NP DT  ";
             }
             pw.println(head);
             
@@ -212,6 +212,10 @@ public class Log {
         this.heist.setAssaultPartyElemCv(id, 0);
     }
     
+    public synchronized void resetAssaultPartyMember(int party, int i, int id){
+        this.heist.setAssaultPartyElemId(party, i, id);
+    }
+    
     public synchronized int getAssaultPartyElemNumber(int id){
         return this.heist.getAssaultPartyElemNumber(id);
     }
@@ -222,6 +226,14 @@ public class Log {
     
     public synchronized int getAssaultPartyElemPosition(int id){
         return this.heist.getAssaultPartyElemPos(id);
+    }
+    
+    public synchronized int getAssaultParty1RoomId(){
+        return this.heist.getAssaultParty1Rid();
+    }
+    
+    public synchronized int getAssaultParty2RoomId(){
+        return this.heist.getAssaultParty2Rid();
     }
     
     public synchronized void updateAssautPartyElemPosition(int id, int pos){
@@ -253,15 +265,15 @@ public class Log {
     
     private void printStatesLine(){
         pw.print(this.heist.getMasterState());
-        pw.print(" ");
+        pw.print("  ");
         
         for(int i=1; i<=6; i++){
             pw.print(this.heist.getThiefState(i));
             pw.print(" ");
             pw.print(this.heist.getThiefSituation(i));
-            pw.print(" ");
+            pw.print("  ");
             pw.print(this.heist.getThiefMaxDisplacement(i));
-            pw.print(" ");
+            pw.print("    ");
         }
         
         pw.println();
@@ -269,33 +281,47 @@ public class Log {
     }
     
     private void printAssaultLine(){
+        pw.print("     ");
         pw.print(this.heist.getAssaultParty1Rid());
-        pw.print(" ");
+        pw.print("    ");
         for(int i = 1; i<=3; i++){
             pw.print(this.heist.getAssaultPartyElemId(1, i));
-            pw.print(" ");
-            pw.print(this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(1, i)));
-            pw.print(" ");
+            pw.print("  ");
+            pw.print(String.format("%1$2s", this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(1, i))));
+            pw.print("  ");
             pw.print(this.heist.getAssaultPartyElemCv(1, i));
-            pw.print(" ");
+            pw.print("   ");
         }
-        pw.print(" ");
-        pw.print(this.heist.getAssaultParty2Rid());
-        pw.print(" ");
-        for(int i = 1; i<=3; i++){
-            pw.print(this.heist.getAssaultPartyElemId(2, i));
-            pw.print(" ");
-            pw.print(this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(2, i)));
-            pw.print(" ");
-            pw.print(this.heist.getAssaultPartyElemCv(2, i));
-            pw.print(" ");
+        if(this.heist.getAssaultParty2Rid()==0){
+            pw.print("-");
+            pw.print("    ");
+            for(int i = 1; i<=3; i++){
+                pw.print("-");
+                pw.print("  ");
+                pw.print(String.format("%1$2s", "-"));
+                pw.print("  ");
+                pw.print("-");
+                pw.print("   ");
+            }
+            pw.print("  ");
+        }else{
+            pw.print(this.heist.getAssaultParty2Rid());
+            pw.print("    ");
+            for(int i = 1; i<=3; i++){
+                pw.print(this.heist.getAssaultPartyElemId(2, i));
+                pw.print("  ");
+                pw.print(String.format("%1$2s", this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(2, i))));
+                pw.print("  ");
+                pw.print(this.heist.getAssaultPartyElemCv(2, i));
+                pw.print("   ");
+            }
+            pw.print("  ");
         }
-        pw.print(" ");
         for(int i = 1; i<=5; i++){
             pw.print(this.heist.getMuseumRoomPaintings(i));
             pw.print(" ");
             pw.print(this.heist.getMuseumRoomDistance(i));
-            pw.print(" ");
+            pw.print("   ");
         }
         pw.println();
         pw.flush();      

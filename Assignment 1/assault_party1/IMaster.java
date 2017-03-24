@@ -11,5 +11,5 @@ package assault_party1;
  */
 public interface IMaster {
     
-    public void sendAssaultParty(int RId, int dt);
+    public void sendAssaultParty();
 }

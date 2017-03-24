@@ -17,7 +17,7 @@ public class AssaultParty1 implements IMaster, IThieves{
     private int counterToCrawlBack = 0;
     private int lastElemToCrawl = 0;
     private int nextElemToCrawl = 0;
-    private int roomId;
+    private int room_id;
     private int nElemParty = 0;
     private int roomDistance = 0;
     private final Log log;
@@ -28,32 +28,35 @@ public class AssaultParty1 implements IMaster, IThieves{
     
     @Override
     public synchronized int waitForSendAssaultParty(int id, int md) {
+        System.out.println(partyReady);
+        partyReady=false;
         if(nElemParty==3){
-            partyReady=false;
             first = true;
             nElemParty=0;
             counterToCrawlBack = 0;
             notifyAll();
         }
         nElemParty++;
-        notifyAll();
-        while(!this.partyReady){
+        notify();
+        while(!partyReady){
             try {
                 wait();
             } catch (InterruptedException ex) {
                 Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        System.out.println(partyReady);
         //System.out.println(id);
-        return roomId;
+        return room_id;
     }
     
     @Override
-    public synchronized void sendAssaultParty(int rid, int dt) {
+    public synchronized void sendAssaultParty() {
         partyReady = true;
-        roomId = rid;
-        roomDistance = dt;
-        while(this.nElemParty<3){
+        room_id = log.getAssaultParty1RoomId();
+        roomDistance = log.getRoomDistance(room_id);
+        System.out.println(nElemParty);
+        while(this.nElemParty<2){
             try {
                 wait();
             } catch (InterruptedException ex) {
@@ -62,13 +65,14 @@ public class AssaultParty1 implements IMaster, IThieves{
         }
         this.nextElemToCrawl = this.log.getAssaultPartyElemId(1, 1);
         //System.out.println("Primeiro elemento " + nextElemToCrawl);
-        this.lastElemToCrawl = this.log.getAssaultPartyElemId(1, 3);
+        this.lastElemToCrawl = this.log.getAssaultPartyElemId(1, 2);
         notifyAll();
     }
     
     @Override
     public synchronized boolean atMuseum(int id) {
-        return this.log.getAssaultPartyElemPosition(id) == roomDistance;
+        //return this.log.getAssaultPartyElemPosition(id) == roomDistance;
+        return true;
     }
 
     @Override
@@ -85,7 +89,7 @@ public class AssaultParty1 implements IMaster, IThieves{
     
     @Override
     public synchronized void crawlIn(int id) {
-        int nextPosition;
+        /*int nextPosition;
         int nextElemToCrawlPosition = this.log.getAssaultPartyElemPosition(id);
         int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
         int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(this.lastElemToCrawl);
@@ -94,37 +98,27 @@ public class AssaultParty1 implements IMaster, IThieves{
             this.log.printALine();
             first = false;
         }
-        if(nextElemToCrawlPosition+nextElemToCrawlMaxDispl>lastElemToCrawlPosition+3){
-            nextPosition = lastElemToCrawlPosition+3;
-            // If distance > roomPos
-            if(nextPosition > roomDistance){
+        /*if(nextElemToCrawlPosition+nextElemToCrawlMaxDispl>=lastElemToCrawlPosition+3){
+            nextPosition = nextElemToCrawlPosition+3;
+            if(nextPosition>=roomDistance){
                 nextPosition = roomDistance;
             }
-            this.lastElemToCrawl = id;
+            nextPosition = checkPosition(nextPosition,id);
             setNextElemToCrawl(id);
-            //notifyAll();
         }else{
-            if(nextElemToCrawlPosition+nextElemToCrawlMaxDispl==lastElemToCrawlPosition){
-                if(lastElemToCrawlPosition == roomDistance){
-                    nextPosition = roomDistance;
-                    this.lastElemToCrawl = id;
-                    setNextElemToCrawl(id);
-                }else{
-                    nextPosition = lastElemToCrawlPosition-1;
-                }
-            }else{
-                nextPosition = nextElemToCrawlPosition+nextElemToCrawlMaxDispl;
-                nextPosition = checkPosition(nextPosition,id);
-                if(nextPosition >= roomDistance){
-                    nextPosition = roomDistance;
-                    this.lastElemToCrawl = id;
-                    setNextElemToCrawl(id);
-                }
+            nextPosition = nextElemToCrawlPosition+nextElemToCrawlMaxDispl;
+            nextPosition = checkPosition(nextPosition,id);
+            if(nextPosition >= roomDistance){
+                nextPosition = roomDistance;
+                setNextElemToCrawl(id);
             }
         }
         //System.out.println(id + " " + nextPosition + " " + nextElemToCrawl);
-        this.log.updateAssautPartyElemPosition(id, nextPosition);
-        //notifyAll();
+        */
+        //this.log.updateAssautPartyElemPosition(id, nextPosition);  
+        this.log.updateAssautPartyElemPosition(id, roomDistance);
+        setNextElemToCrawl(id);
+        notifyAll();
     }
     
     private synchronized void setNextElemToCrawl(int id){
@@ -134,6 +128,7 @@ public class AssaultParty1 implements IMaster, IThieves{
         }else{
             lastToCrawl++;
         }
+        this.lastElemToCrawl = id;
         this.nextElemToCrawl = this.log.getAssaultPartyElemId(1,lastToCrawl);
         notifyAll();
         //System.out.println("here"+nextElemToCrawl);
@@ -144,7 +139,7 @@ public class AssaultParty1 implements IMaster, IThieves{
         for(int i=1;i<=3;i++){
             elem_id=this.log.getAssaultPartyElemId(1, i);
             if(elem_id!=id && elem_id!=this.lastElemToCrawl){
-                if(this.log.getAssaultPartyElemPosition(elem_id)==pos){
+                if(this.log.getAssaultPartyElemPosition(elem_id)==pos && this.log.getAssaultPartyElemPosition(elem_id)!=roomDistance){
                     pos -= 1;
                     break;
                 }
@@ -171,7 +166,8 @@ public class AssaultParty1 implements IMaster, IThieves{
     
     @Override
     public synchronized boolean atConcentration(int id) {
-        return this.log.getAssaultPartyElemPosition(id) == 0;
+        //return this.log.getAssaultPartyElemPosition(id) == 0;
+        return true;
     }
     
     @Override

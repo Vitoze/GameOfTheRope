@@ -3,8 +3,9 @@
  */
 package control_collect_site;
 
-import java.util.LinkedList;
+import java.util.HashMap;
 import general_info_repo.Log;
+import general_info_repo.Heist;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,13 +14,14 @@ import java.util.logging.Logger;
  *  @author João Brito
  */
 public class ControlCollectionSite implements IMaster, IThieves {
-    private boolean collectCanvas = false;
-    private LinkedList<Integer> rooms;
+    private boolean canvasCollected = false;
+    private HashMap<Integer, Boolean> museum;
     private int nElemToWait = 0;
     private final Log log;
     
     public ControlCollectionSite(){
         log = Log.getInstance();
+        museum = new HashMap<>();
     }
     
     /**
@@ -28,12 +30,9 @@ public class ControlCollectionSite implements IMaster, IThieves {
      */
     @Override
     public void startOperations() {
-        rooms = new LinkedList<>();
-        rooms.add(1);
-        rooms.add(2);
-        rooms.add(3);
-        rooms.add(4);
-        rooms.add(5);
+        for(int rid=1; rid<=Heist.N_ROOMS; rid++){
+            museum.put(rid, true);
+        }
     }
     
     /**
@@ -42,38 +41,44 @@ public class ControlCollectionSite implements IMaster, IThieves {
      */
     @Override
     public synchronized int[] appraiseSit() {
-        int [] decision = new int[4];
-        if(rooms.isEmpty()){
+        nElemToWait = 6;
+        canvasCollected = false;
+        int assault_party1_rid = 0;
+        int assault_party2_rid = 0;
+        int decision[] = new int[2];
+        decision[0] = 1;
+        for(int rid=1; rid<=Heist.N_ROOMS; rid++){
+            if(museum.get(rid)){
+                assault_party1_rid = rid;
+                break;
+            }
+            assault_party1_rid = 0;
+        }
+        if(assault_party1_rid==0){
             decision[0] = 2;
-            decision[1] = 0;
-            decision[2] = 0;
-            decision[3] = 0;
+            return decision;
         }
-        if(rooms.size() < 2){
-            decision[0] = 1;
-            decision[1] = rooms.getFirst();
-            decision[2] = 0;
-            decision[3] = 0;
+        if(assault_party1_rid==Heist.N_ROOMS){
+            assault_party2_rid = decision[1] = 0;
+            nElemToWait = 3;
+            log.setAssaultPartyAction(assault_party1_rid, assault_party2_rid);
+            return decision;
         }else{
-            decision[0] = 1;
-            decision[1] = rooms.get(0);
-            decision[2] = rooms.get(1);
-            decision[3] = 1;
+            for(int rid=assault_party1_rid+1; rid<=Heist.N_ROOMS; rid++){
+                if(museum.get(rid)){
+                    assault_party2_rid = rid;
+                    break;
+                }
+            }
         }
-        
-        if(decision[3]==0){
-            this.nElemToWait = 3;
-        }else{
-            this.nElemToWait = 6;
-        }
-        System.out.println("Master1");
+        log.setAssaultPartyAction(assault_party1_rid, assault_party2_rid);
+        decision[1] = 1;
         return decision;
     }
     
     @Override
     public synchronized void takeARest() {
-        collectCanvas = false;
-        while(!collectCanvas){
+        while(!canvasCollected){
             try {
                 wait();
             } catch (InterruptedException ex) {
@@ -85,16 +90,14 @@ public class ControlCollectionSite implements IMaster, IThieves {
     @Override
     public synchronized void handACanvas(int id, int rid, int cv) {
         if(cv==0){
-            if(rooms.contains(rid)){
-                rooms.remove(rid);
-            }
+            museum.replace(rid, false);
         }
-        this.log.updateAssaultPartyElemCv(id, cv);
-        this.nElemToWait--;
-        if(this.nElemToWait==0){ 
-            collectCanvas = true;
+        nElemToWait--;
+        if(nElemToWait==0){ 
+            canvasCollected = true;
             notify();
         }
+        log.updateAssaultPartyElemCv(id, 0);
     }
        
 }

@@ -46,7 +46,7 @@ public class Main {
         thieves = new Thieves[nThieves];
         for(int i = 0; i<nThieves; i++){
             Random rand = new Random();
-            int md = rand.nextInt(5) + 2;
+            int md = rand.nextInt(Heist.THIEF_MAX_MD+1-Heist.THIEF_MIN_MD) + Heist.THIEF_MIN_MD;
             thieves[i] = new Thieves(i+1,md,(museum.IThieves) museum, (assault_party1.IThieves) party1, (assault_party2.IThieves) party2, (concentration_site.IThieves) concentration, (control_collect_site.IThieves) control);
         }
         
@@ -65,7 +65,7 @@ public class Main {
             //Escrever para o log
         }
         
-        for(int i=0; i<Heist.N_THIEVES; i++){
+        for(int i=0; i<nThieves; i++){
             try{
                 thieves[i].join();
                 System.err.println("Thief Died: " + i);

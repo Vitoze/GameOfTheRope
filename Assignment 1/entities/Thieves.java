@@ -56,12 +56,9 @@ public class Thieves extends Thread {
                         this.collect.handACanvas(this.id, party_room, canvas);
                         hasCanvas = false;
                     }
-                    switch(this.concentration.amINeeded(this.id, party)){
-                        case -1:
-                            break;
+                    switch(this.concentration.amINeeded(this.id)){
                         case 0:
                             party = this.concentration.prepareExcursion(this.id);
-                            this.log.updateThiefSituation(this.id, 'P');
                             this.state = ThievesState.CRAWLING_INWARDS;
                             break;
                         case 1:

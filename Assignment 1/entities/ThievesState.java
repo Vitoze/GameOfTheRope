@@ -13,28 +13,28 @@ public enum ThievesState {
     OUTSIDE{
         @Override
         public String toString(){
-            return "OUT";
+            return "OUTS";
         }
     },
     
     CRAWLING_OUTWARDS{
         @Override
         public String toString(){
-            return "CRO";
+            return "CROT";
         }
     },
     
     AT_A_ROOM{
         @Override
         public String toString(){
-            return "ATR";
+            return "ATAR";
         }
     },
     
     CRAWLING_INWARDS{
         @Override
         public String toString(){
-            return "CRI";
+            return "CRIN";
         }
     }
 }

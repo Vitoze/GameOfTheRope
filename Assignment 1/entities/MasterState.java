@@ -13,35 +13,35 @@ public enum MasterState {
     PLANNING_THE_HEIST{
         @Override
         public String toString(){
-            return "PTH";
+            return "PLTH";
         }
     },
     
     DECIDING_WHAT_TO_DO{
         @Override
         public String toString(){
-            return "DWT";
+            return "DWTD";
         }
     },
     
     ASSEMBLING_A_GROUP{
         @Override
         public String toString(){
-            return "AAG";
+            return "ASAG";
         }
     },
     
     WAINTING_FOR_GROUP_ARRIVAL{
         @Override
         public String toString(){
-            return "WGA";
+            return "WFGA";
         }
     },
     
     PRESENTING_THE_REPORT{
         @Override
         public String toString(){
-            return "PTR";
+            return "PRTR";
         }
     }
 }

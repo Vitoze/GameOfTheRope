@@ -11,9 +11,11 @@ import java.util.HashMap;
  *  This heist singleton will have assaults, thieves displacements, states.
  *  @author João Brito
  */
-public class Heist {
-    public static final int N_THIEVES = 6;
+public class Heist{
     public static final int N_ROOMS = 5;
+    public static final int N_THIEVES = 6;
+    public static final int THIEF_MIN_MD = 2;
+    public static final int THIEF_MAX_MD = 6;
     public static final int N_MIN_PAINTINGS = 8;
     public static final int N_MAX_PAINTINGS = 16;
     public static final int N_MIN_DISTANCE = 15;
