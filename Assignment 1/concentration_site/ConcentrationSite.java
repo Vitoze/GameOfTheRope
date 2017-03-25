@@ -33,6 +33,7 @@ public class ConcentrationSite implements IMaster, IThieves {
     @Override
     public synchronized void prepareAssaultParty(int last) {
         thievesReady = false;
+        notifyAll();
         if(last==0){
             lastAssault = true;
         }
@@ -77,6 +78,12 @@ public class ConcentrationSite implements IMaster, IThieves {
                 Logger.getLogger(ConcentrationSite.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        thieves.pop();
+        if(lastAssault && thieves.size()==3){
+            callAssault = false;
+            notifyAll();
+        }
+        notifyAll();
         return orders;
     }
     
@@ -94,20 +101,16 @@ public class ConcentrationSite implements IMaster, IThieves {
     
     @Override
     public synchronized int prepareExcursion(int id) {
-        thieves.pop();
-        if(lastAssault && thieves.size()==3){
-            callAssault = false;
-        }
-        notifyAll();
         int party;
         thievesReady = false;
         if(lastAssault){
             counter1++;
             party = 1;
             this.log.setAssaultPartyMember(party, counter1, id);
+            System.out.println("counter: "+counter1);
             if(counter1==3){
                 thievesReady = true;
-                notify();
+                notifyAll();
             }
             this.log.updateThiefSituation(id, 'P');
             return party;
@@ -135,7 +138,6 @@ public class ConcentrationSite implements IMaster, IThieves {
     public synchronized void sumUpResults() {
         this.orders = 1;
         this.endHeist = true;
-        log.printResults();
         notifyAll();
     }
     

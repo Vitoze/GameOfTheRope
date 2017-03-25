@@ -41,6 +41,7 @@ public class ControlCollectionSite implements IMaster, IThieves {
      */
     @Override
     public synchronized int[] appraiseSit() {
+        System.out.println("------------------");
         nElemToWait = 6;
         canvasCollected = false;
         int assault_party1_rid = 0;

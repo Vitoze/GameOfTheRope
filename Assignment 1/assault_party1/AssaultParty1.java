@@ -37,7 +37,7 @@ public class AssaultParty1 implements IMaster, IThieves{
             notifyAll();
         }
         nElemParty++;
-        notify();
+        notifyAll();
         while(!partyReady){
             try {
                 wait();
@@ -50,10 +50,10 @@ public class AssaultParty1 implements IMaster, IThieves{
     
     @Override
     public synchronized void sendAssaultParty() {
-        partyReady = true;
+        partyReady = false;
         room_id = log.getAssaultParty1RoomId();
         roomDistance = log.getRoomDistance(room_id);
-        System.out.println(nElemParty);
+        System.out.println("Master " +nElemParty);
         while(this.nElemParty<3){
             try {
                 wait();
@@ -61,6 +61,7 @@ public class AssaultParty1 implements IMaster, IThieves{
                 Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        partyReady = true;
         this.nextElemToCrawl = this.log.getAssaultPartyElemId(1, 1);
         this.lastElemToCrawl = this.log.getAssaultPartyElemId(1, 2);
         notifyAll();
@@ -68,7 +69,9 @@ public class AssaultParty1 implements IMaster, IThieves{
     
     @Override
     public synchronized boolean atMuseum(int id) {
-        return this.log.getAssaultPartyElemPosition(id) == roomDistance;
+        System.out.println("AP1-Musuem?");
+        return true;
+        //return this.log.getAssaultPartyElemPosition(id) == roomDistance;
     }
 
     @Override
@@ -107,6 +110,7 @@ public class AssaultParty1 implements IMaster, IThieves{
                 nextPosition = roomDistance;
                 setNextElemToCrawl(id);
             }
+            nextElemToCrawl=id;
         }
         this.log.updateAssautPartyElemPosition(id, nextPosition);
         notifyAll();
@@ -121,6 +125,7 @@ public class AssaultParty1 implements IMaster, IThieves{
         }
         this.lastElemToCrawl = id;
         this.nextElemToCrawl = this.log.getAssaultPartyElemId(1,lastToCrawl);
+        System.out.println("AP1: "+lastElemToCrawl+" "+nextElemToCrawl);
         notifyAll();
     }
     

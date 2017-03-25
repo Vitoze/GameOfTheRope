@@ -216,11 +216,11 @@ public class Heist{
     }
     
     public synchronized void setMuseumRoomsPaintings(int id, int np) {
-        this.totalPaintings+=np;
         if(this.museum_rooms_paintings.containsKey(id)){
             this.museum_rooms_paintings.replace(id, np);
         }else{
             this.museum_rooms_paintings.put(id, np);
+            this.totalPaintings+=np;
         }
     }
     

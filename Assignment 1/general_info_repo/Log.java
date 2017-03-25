@@ -130,6 +130,7 @@ public class Log {
      *   This method will be called to finish write the logging file.
      */
     public synchronized void writeEnd(){
+        this.printResults();
         pw.println("\nLegend:");
         pw.println("MstT Stat    – state of the master thief");
         pw.println("Thief # Stat - state of the ordinary thief # (# - 1 .. 6)");
@@ -328,7 +329,7 @@ public class Log {
     }
     
     public void printResults(){
-        pw.print("My friends, tonight's effort produced "+this.heist.getTotalPaintings()+" priceless paintings!");
+        pw.println("My friends, tonight's effort produced "+this.heist.getTotalPaintings()+" priceless paintings!");
         pw.println();
         pw.flush();
     }
