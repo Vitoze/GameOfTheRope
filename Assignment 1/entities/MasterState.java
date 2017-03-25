@@ -1,15 +1,16 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package entities;
 
 /**
- *
- * @author João Brito
+ * States for the Master
+ * @author João Brito, 68137
  */
 public enum MasterState {
+    /**
+     * PLANNING_THE_HEIST = PLTH
+     */
     PLANNING_THE_HEIST{
         @Override
         public String toString(){
@@ -17,6 +18,9 @@ public enum MasterState {
         }
     },
     
+    /**
+     * DECIDING_WHAT_TO_DO = DWTD
+     */
     DECIDING_WHAT_TO_DO{
         @Override
         public String toString(){
@@ -24,6 +28,9 @@ public enum MasterState {
         }
     },
     
+    /**
+     * ASSEMBLING_A_GROUP = ASAG
+     */
     ASSEMBLING_A_GROUP{
         @Override
         public String toString(){
@@ -31,13 +38,19 @@ public enum MasterState {
         }
     },
     
-    WAINTING_FOR_GROUP_ARRIVAL{
+    /**
+     * WAITING_FOR_GROUP_ARRIVAL = WFGA
+     */
+    WAITING_FOR_GROUP_ARRIVAL{
         @Override
         public String toString(){
             return "WFGA";
         }
     },
     
+    /**
+     * PRESENTING_THE_REPORT = PRTR
+     */
     PRESENTING_THE_REPORT{
         @Override
         public String toString(){

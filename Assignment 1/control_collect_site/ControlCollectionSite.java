@@ -11,14 +11,17 @@ import java.util.logging.Logger;
 
 /**
  *  Control and Collection Site instance.
- *  @author João Brito
+ *  @author João Brito, 68137
  */
 public class ControlCollectionSite implements IMaster, IThieves {
     private boolean canvasCollected = false;
-    private HashMap<Integer, Boolean> museum;
+    private final HashMap<Integer, Boolean> museum;
     private int nElemToWait = 0;
     private final Log log;
     
+    /**
+     * Init the Control Site instance.
+     */
     public ControlCollectionSite(){
         log = Log.getInstance();
         museum = new HashMap<>();
@@ -26,7 +29,7 @@ public class ControlCollectionSite implements IMaster, IThieves {
     
     /**
      * In Master life cycle, transition between "Planning the heist" and "Deciding what to do",
-     * initiates a heist.
+     * initiates a heist. Master method.
      */
     @Override
     public void startOperations() {
@@ -37,11 +40,10 @@ public class ControlCollectionSite implements IMaster, IThieves {
     
     /**
      * The Master decides what to do next
-     * @return 1 to prepare new assault or 2 to end heist 
+     * @return 1 to prepare new assault or 2 to end heist. Master method.
      */
     @Override
     public synchronized int[] appraiseSit() {
-        System.out.println("------------------");
         nElemToWait = 6;
         canvasCollected = false;
         int assault_party1_rid = 0;
@@ -77,6 +79,9 @@ public class ControlCollectionSite implements IMaster, IThieves {
         return decision;
     }
     
+    /**
+     * The master will wait for the assault party arrival. Master method.
+     */
     @Override
     public synchronized void takeARest() {
         while(!canvasCollected){
@@ -88,6 +93,12 @@ public class ControlCollectionSite implements IMaster, IThieves {
         }
     }
     
+    /**
+     * The thief will hand a canvas. Thieves method.
+     * @param id thief id.
+     * @param rid room number.
+     * @param cv has canvas? 0 or 1.
+     */
     @Override
     public synchronized void handACanvas(int id, int rid, int cv) {
         if(cv==0){

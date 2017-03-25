@@ -4,28 +4,38 @@
 package assault_party2;
 
 import general_info_repo.Log;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author João Brito
+ * Assault party#2 instance.
+ * @author João Brito, 68137
  */
 public class AssaultParty2 implements IMaster, IThieves{
     private boolean partyReady = false;
     private boolean first = true;
     private int counterToCrawlBack = 0;
-    private int lastElemToCrawl = 0;
-    private int nextElemToCrawl = 0;
     private int room_id;
     private int nElemParty = 0;
     private int roomDistance = 0;
+    private final LinkedList<Integer> nextElem;
     private final Log log;
     
+    /**
+     * Init the assault party#2.
+     */
     public AssaultParty2(){
         this.log = Log.getInstance();
+        nextElem = new LinkedList<>();
     }
     
+    /**
+     * The thieves will wait for the Master to send the assault party. Thieves method.
+     * @param id thief id.
+     * @param md thied max displacement.
+     * @return room number to assault.
+     */
     @Override
     public synchronized int waitForSendAssaultParty(int id, int md) {
         partyReady=false;
@@ -47,6 +57,9 @@ public class AssaultParty2 implements IMaster, IThieves{
         return room_id;
     }
     
+    /**
+     * The Master will send the assault party. Master method.
+     */
     @Override
     public synchronized void sendAssaultParty() {
         partyReady = false;
@@ -60,20 +73,32 @@ public class AssaultParty2 implements IMaster, IThieves{
             }
         }
         partyReady=true;
-        this.nextElemToCrawl = this.log.getAssaultPartyElemId(2, 1);
-        this.lastElemToCrawl = this.log.getAssaultPartyElemId(2, 3);
+        while(!nextElem.isEmpty()){
+            nextElem.remove();
+        }
+        nextElem.add(this.log.getAssaultPartyElemId(2, 1));
+        nextElem.add(this.log.getAssaultPartyElemId(2, 2));
+        nextElem.add(this.log.getAssaultPartyElemId(2, 3));
         notifyAll();
     }
     
+    /**
+     * Checks if thief is at the museum. Thieves method.
+     * @param id thief id.
+     * @return true or false.
+     */
     @Override
     public synchronized boolean atMuseum(int id) {
-        return true;
-        //return this.log.getAssaultPartyElemPosition(id) == roomDistance;
+        return this.log.getAssaultPartyElemPosition(id) == roomDistance;
     }
 
+    /**
+     * The thieves wait for another thief to crawl. Thieves method.
+     * @param id thief id.
+     */
     @Override
     public synchronized void waitForMember(int id) {
-        while(id!=this.nextElemToCrawl){
+        while(id!=nextElem.getFirst()){
             try {
                 wait();
             } catch (InterruptedException ex) {
@@ -82,13 +107,17 @@ public class AssaultParty2 implements IMaster, IThieves{
         }
     }
     
+    /**
+     * Implements the crawl in movement. Thieves method.
+     * @param id thief id.
+     */
     @Override
     public synchronized void crawlIn(int id) {
         int nextPosition;
         int nextElemToCrawlPosition = this.log.getAssaultPartyElemPosition(id);
         int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
-        int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(this.lastElemToCrawl);
-        // If pos(id)+md>pos(id-1)+3
+        int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(nextElem.getLast());
+        
         if(first){
             this.log.printALine();
             first = false;
@@ -99,33 +128,35 @@ public class AssaultParty2 implements IMaster, IThieves{
                 nextPosition = roomDistance;
             }
             nextPosition = checkPosition(nextPosition,id);
-            setNextElemToCrawl(id);
+            setNextElemToCrawl();
         }else{
             nextPosition = nextElemToCrawlPosition+nextElemToCrawlMaxDispl;
             nextPosition = checkPosition(nextPosition,id);
             if(nextPosition >= roomDistance){
                 nextPosition = roomDistance;
-                setNextElemToCrawl(id);
+                setNextElemToCrawl();
             }
-            nextElemToCrawl=id;
         }
         this.log.updateAssautPartyElemPosition(id, nextPosition);
         notifyAll();
     }
     
-    private synchronized void setNextElemToCrawl(int id){
-        int lastToCrawl = this.log.getAssaultPartyElemNumber(id);
-        if(lastToCrawl==3){
-            lastToCrawl = 1;
-        }else{
-            lastToCrawl++;
-        }
-        this.lastElemToCrawl = id;
-        this.nextElemToCrawl = this.log.getAssaultPartyElemId(2,lastToCrawl);
-        System.out.println("AP2: "+lastElemToCrawl+" "+nextElemToCrawl);
+    /**
+     * Set the next element to crawl.
+     */
+    private synchronized void setNextElemToCrawl(){
+        int tmp = nextElem.getFirst();
+        nextElem.pop();
+        nextElem.add(tmp);
         notifyAll();
     }
     
+    /**
+     * Checks a thief position after crawl movement. Avoids collision.
+     * @param pos thief position.
+     * @param id thief id.
+     * @return thief position.
+     */
     private int checkPosition(int pos, int id){
         int elem_id;
         for(int i=1;i<=3;i++){
@@ -140,10 +171,11 @@ public class AssaultParty2 implements IMaster, IThieves{
         return pos;
     }
 
+    /**
+     * The thieves will await for all to be prepare to crawl out. Thieves method.
+     */
     @Override
     public synchronized void waitForReverseDirection() {
-        this.nextElemToCrawl = this.log.getAssaultPartyElemId(2, 1);
-        this.lastElemToCrawl = this.log.getAssaultPartyElemId(2, 3);
         counterToCrawlBack++;
         notifyAll();
         while(counterToCrawlBack<3){
@@ -155,17 +187,26 @@ public class AssaultParty2 implements IMaster, IThieves{
         }
     }
     
+    /**
+     * Checks if a thief is at the concentration site. Thieves method.
+     * @param id thief id.
+     * @return true or false.
+     */
     @Override
     public synchronized boolean atConcentration(int id) {
         return this.log.getAssaultPartyElemPosition(id) == 0;
     }
     
+    /**
+     * Simulates the crawl movement back to the concentration site.
+     * @param id thief id.
+     */
     @Override
     public synchronized void crawlOut(int id) {
         int nextPosition;
         int nextElemToCrawlPosition = this.log.getAssaultPartyElemPosition(id);
         int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
-        int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(this.lastElemToCrawl);
+        int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(nextElem.getLast());
         
         if(first){
             this.log.printALine();
@@ -177,19 +218,24 @@ public class AssaultParty2 implements IMaster, IThieves{
                 nextPosition = 0;
             }
             nextPosition = checkPositionBack(nextPosition,id);
-            setNextElemToCrawl(id);
+            setNextElemToCrawl();
         }else{
             nextPosition = nextElemToCrawlPosition-nextElemToCrawlMaxDispl;
             nextPosition = checkPositionBack(nextPosition,id);
             if(nextPosition <= 0){
                 nextPosition = 0;
-                setNextElemToCrawl(id);
+                setNextElemToCrawl();
             }
         }
         this.log.updateAssautPartyElemPosition(id, nextPosition);
-        notifyAll();
     }
     
+    /**
+     * Checks a thief position after crawl movement. Avoids collision.
+     * @param pos thief position.
+     * @param id thief id.
+     * @return thief position.
+     */
     private int checkPositionBack(int pos, int id){
         int elem_id;
         for(int i=1;i<=3;i++){

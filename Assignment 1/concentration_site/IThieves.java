@@ -1,18 +1,26 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package concentration_site;
 
 /**
- *
- * @author João Brito
+ * Thieves interface of Concentration Site instance.
+ * @author João Brito, 68137
  */
 public interface IThieves {
     
+    /**
+     * The thieves will await for further instructions.
+     * @param id thief id.
+     * @return instructions.
+     */
     public int amINeeded(int id);
     
+    /**
+     * The thieves will move to an assault party.
+     * @param id thief id.
+     * @return assault party number.
+     */
     public int prepareExcursion(int id);
     
 }

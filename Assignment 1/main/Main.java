@@ -17,7 +17,7 @@ import java.util.*;
 /**
  * Heist to the Museum main!
  * 
- * @author João Brito
+ * @author João Brito, 68137
  */
 public class Main {
     private static ControlCollectionSite control;

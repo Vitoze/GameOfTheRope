@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package museum;
 
@@ -9,12 +7,15 @@ import general_info_repo.Heist;
 import general_info_repo.Log;
 import java.util.Random;
 /**
- *
- * @author João Brito
+ * Museum instance.
+ * @author João Brito, 68137
  */
 public class Museum implements IThieves{
     private final Log log;
     
+    /**
+     * Init the Museum instance.
+     */
     public Museum(){
         this.log = Log.getInstance();
         for(int i=1; i<=Heist.N_ROOMS; i++){
@@ -26,7 +27,13 @@ public class Museum implements IThieves{
             //System.out.println(i+" "+np);
         }
     }
-
+    
+    /**
+     * Theft of a canvas from the museum. Thieves method.
+     * @param id thief id.
+     * @param rid room number.
+     * @return '0' if there isn't more canvas.
+     */
     @Override
     public synchronized int rollACanvas(int id, int rid) {
         if(log.getMuseumPaintings(rid)>0){

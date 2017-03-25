@@ -1,15 +1,16 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package entities;
 
 /**
- *
- * @author João Brito
+ * States for the thieves.
+ * @author João Brito, 68137
  */
 public enum ThievesState {
+    /**
+     * OUTSIDE = OUTS
+     */
     OUTSIDE{
         @Override
         public String toString(){
@@ -17,6 +18,9 @@ public enum ThievesState {
         }
     },
     
+    /**
+     * CRAWLING_OUTWARDS = CROT
+     */
     CRAWLING_OUTWARDS{
         @Override
         public String toString(){
@@ -24,6 +28,9 @@ public enum ThievesState {
         }
     },
     
+    /**
+     * AT_A_ROOM = ATAR
+     */
     AT_A_ROOM{
         @Override
         public String toString(){
@@ -31,6 +38,9 @@ public enum ThievesState {
         }
     },
     
+    /**
+     * CRAWLING_INWARDS = CRIN
+     */
     CRAWLING_INWARDS{
         @Override
         public String toString(){

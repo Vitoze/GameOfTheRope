@@ -1,14 +1,12 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package entities;
 
 import general_info_repo.Log;
 /**
- *
- * @author João Brito
+ * Thieves instance.
+ * @author João Brito, 68137
  */
 public class Thieves extends Thread {
     private final museum.IThieves museum;
@@ -20,9 +18,19 @@ public class Thieves extends Thread {
     
     private final int id;
     private ThievesState state;
-    private char s;
+    private final char s;
     private final int md;
     
+    /**
+     * It will be passed to the thief the methods that it has access.
+     * @param id Thief identification.
+     * @param md Thief maximum displacement.
+     * @param museum Instance that implements Museum Thieves methods.
+     * @param party1 Instance that implements Assault party#1 Thieves methods.
+     * @param party2 Instance that implements Assault party#2 Thieves methods.
+     * @param concentration Instance that implements Concentration site Thieves methods.
+     * @param collect Instance that implements Collection site Thieves methods.
+     */
     public Thieves(int id, int md, museum.IThieves museum, assault_party1.IThieves party1, assault_party2.IThieves party2, concentration_site.IThieves concentration, control_collect_site.IThieves collect){
         this.id = id;
         this.museum = museum;

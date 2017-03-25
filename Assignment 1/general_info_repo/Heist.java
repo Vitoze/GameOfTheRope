@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 /**
  *  This heist singleton will have assaults, thieves displacements, states.
- *  @author João Brito
+ *  @author João Brito, 68137
  */
 public class Heist{
     public static final int N_ROOMS = 5;
@@ -109,45 +109,84 @@ public class Heist{
             this.thieves_maxDisplacement.put(id, md);
         }
     }
-
+    
+    /**
+     * This method will return the Master state.
+     * @return Master state.
+     */
     public synchronized MasterState getMasterState() {
         return master_state;
     }
-
+    
+    /**
+     * This method will return the Thief state.
+     * @param id Thied identification.
+     * @return Thief state.
+     */
     public synchronized ThievesState getThiefState(int id) {
        return thieves_states.get(id);
     }
-
+    
+    /**
+     * This method will return the Thief situation.
+     * @param id Thief identification.
+     * @return Thief situation.
+     */
     public synchronized char getThiefSituation(int id) {
         return thieves_situation.get(id);
     }
-
+    
+    /**
+     * This method will return the thief max displacement.
+     * @param id thief identification.
+     * @return thief md.
+     */
     public synchronized int getThiefMaxDisplacement(int id) {
         return thieves_maxDisplacement.get(id);
     }
-
+    
+    /**
+     * This method will return the assault party#1 objective.
+     * @return museum room number.
+     */
     public synchronized int getAssaultParty1Rid() {
         return this.assault_party1_Rid;
     }
     
+    /**
+     * This method will set the assault party#1 objective.
+     * @param rid museum room number.
+     */
     public synchronized void setAssaultParty1Rid(int rid) {
         this.assault_party1_Rid=rid;
     }
     
+    /**
+     * This method will return the assault party#2 objective.
+     * @return museum room number.
+     */
     public synchronized int getAssaultParty2Rid() {
         return this.assault_party2_Rid;
     }
     
+    /**
+     * This method will set the assault party#2 objective.
+     * @param rid museum room number.
+     */
     public synchronized void setAssaultParty2Rid(int rid) {
         this.assault_party2_Rid=rid;
     }
     
+    /**
+     * This method will return the total of paintings in the museum.
+     * @return total number of paintings.
+     */
     public synchronized int getTotalPaintings(){
         return this.totalPaintings;
     }
 
     /**
-     * 
+     * This method will set the assault party members.
      * @param party assault party number.
      * @param i assault party element number.
      * @param id thief identification.
@@ -163,6 +202,11 @@ public class Heist{
         }
     }
     
+    /**
+     * This method will set the assault party element number.
+     * @param id thief identification.
+     * @param i assault party element number.
+     */
     public synchronized void setAssaultPartyElemNumber(int id, int i){
         if(this.assault_party_elem_number.containsKey(id)){
             this.assault_party_elem_number.replace(id, i);
@@ -171,6 +215,11 @@ public class Heist{
         }
     }
     
+    /**
+     * This method will set the assault party element has canvas
+     * @param id thief id.
+     * @param cv thief canvas.
+     */
     public synchronized void setAssaultPartyElemCv(int id, int cv){
         if(this.assault_party_cv.containsKey(id)){
             this.assault_party_cv.replace(id, cv);
@@ -179,14 +228,30 @@ public class Heist{
         }
     }
     
+    /**
+     * This method will return the assault party element number.
+     * @param id thief id.
+     * @return assault party element number.
+     */
     public synchronized int getAssaultPartyElemNumber(int id){
         return this.assault_party_elem_number.get(id);
     }
     
+    /**
+     * This method will return the assault party thief identification.
+     * @param party assault party number.
+     * @param i assault party member number.
+     * @return thief identification.
+     */
     public synchronized int getAssaultPartyElemId(int party, int i) {
         return this.assault_party.get(party).get(i);
     }
     
+    /** 
+     * This method will set the assault party element position.
+     * @param id thief id.
+     * @param pos thief position.
+     */
     public synchronized void setAssaultPartyElemPos(int id, int pos){
         if(this.assault_party_pos.containsKey(id)){
             this.assault_party_pos.replace(id, pos);
@@ -195,14 +260,30 @@ public class Heist{
         }
     }
     
+    /**
+     * This method will return the assault party element number.
+     * @param id thief id.
+     * @return thief position.
+     */
     public synchronized int getAssaultPartyElemPos(int id) {
         return this.assault_party_pos.get(id);
     }
     
+    /**
+     * This method will return if the assault party member has canvas.
+     * @param party assault party number.
+     * @param i assault party element number.
+     * @return thief has canvas.
+     */
     public synchronized int getAssaultPartyElemCv(int party, int i){
        return this.assault_party_cv.get(this.assault_party.get(party).get(i));
     }
-
+    
+    /**
+     * This method will set the museum room distance.
+     * @param id room number.
+     * @param dt room distance.
+     */
     public synchronized void setMuseumRoomsDistance(int id, int dt) {
         if(this.museum_rooms_distance.containsKey(id)){
             this.museum_rooms_distance.replace(id, dt);
@@ -211,10 +292,20 @@ public class Heist{
         }
     }
     
+    /**
+     * This method will return the room distance.
+     * @param id room number.
+     * @return room distance.
+     */
     public synchronized int getMuseumRoomDistance(int id){
         return this.museum_rooms_distance.get(id);
     }
     
+    /**
+     * This method will set the museum room paintings.
+     * @param id room number.
+     * @param np room paintings number.
+     */
     public synchronized void setMuseumRoomsPaintings(int id, int np) {
         if(this.museum_rooms_paintings.containsKey(id)){
             this.museum_rooms_paintings.replace(id, np);
@@ -224,6 +315,11 @@ public class Heist{
         }
     }
     
+    /**
+     * This method will return the museum room paintings.
+     * @param id room number.
+     * @return paintings number.
+     */
     public synchronized int getMuseumRoomPaintings(int id){
         return this.museum_rooms_paintings.get(id);
     }

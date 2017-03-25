@@ -1,15 +1,16 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package assault_party2;
 
 /**
- *
- * @author João Brito
+ * Master interface of AssaultParty#2 instance.
+ * @author João Brito, 68137
  */
 public interface IMaster {
     
+    /**
+     * The Master will send the assault party out.
+     */
     public void sendAssaultParty();
 }

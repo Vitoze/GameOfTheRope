@@ -1,16 +1,20 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package control_collect_site;
 
 /**
- *
- * @author João Brito
+ * Thieves interface of Conctrol Collection Site instance.
+ * @author João Brito, 68137
  */
 public interface IThieves {
     
+    /**
+     * Represents the action of handing a canvas and move to the concentration site.
+     * @param id thief id.
+     * @param rid room number.
+     * @param cv has canvas? 0 or 1.
+     */
     public void handACanvas(int id, int rid, int cv);
 
 }

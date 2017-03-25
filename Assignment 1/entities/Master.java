@@ -7,7 +7,7 @@ import general_info_repo.Log;
 
 /**
  * Master instance.
- * @author João Brito
+ * @author João Brito, 68137
  */
 public class Master extends Thread{
     private final control_collect_site.IMaster control;
@@ -17,11 +17,13 @@ public class Master extends Thread{
     private final Log log;
     private MasterState state;
     
-    /*
-        It will be passed to the Master the methods of the control_collection_site
-        that the master have access.
-        @param control Instance that implements control_collection_site methods
-    */
+    /**
+     * It will be passed to the Master the methods it has access.
+     * @param control Instance that implements Control site Master methods.
+     * @param concentration Instance that implements Concentration site Master methods.
+     * @param party1 Instance that implements Assault party#1 Master methods.
+     * @param party2 Instance that implements Assault party#2 Master methods.
+     */
     public Master(control_collect_site.IMaster control, concentration_site.IMaster concentration, assault_party1.IMaster party1, assault_party2.IMaster party2){
         this.control = control;
         this.concentration = concentration;
@@ -70,9 +72,9 @@ public class Master extends Thread{
                     }else{
                         this.party1.sendAssaultParty();
                     }
-                    this.state = MasterState.WAINTING_FOR_GROUP_ARRIVAL;
+                    this.state = MasterState.WAITING_FOR_GROUP_ARRIVAL;
                     break;
-                case WAINTING_FOR_GROUP_ARRIVAL:
+                case WAITING_FOR_GROUP_ARRIVAL:
                     this.control.takeARest();
                     //this.control.collectCanvas(rooms[3]);
                     this.state = MasterState.DECIDING_WHAT_TO_DO;

@@ -1,26 +1,56 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package assault_party1;
 
 /**
- *
- * @author João Brito
+ * Tieves interface of AssaultParty#2 instance.
+ * @author João Brito, 68137
  */
 public interface IThieves {
+    
+    /**
+     * The thieves wil crawl to the museum.
+     * @param id thief if
+     */
     public void crawlIn(int id);
     
+    /**
+     * The thieves will crawl to the concentration site.
+     * @param id thief id.
+     */
     public void crawlOut(int id);
     
+    /**
+     * The thieves will wait for the master to send the party.
+     * @param id thief id.
+     * @param md thied max displacement.
+     * @return museum room to assault.
+     */
     public int waitForSendAssaultParty(int id, int md);
     
+    /**
+     * The thieves will wait for other thief to make is crawl movement.
+     * @param id thief id.
+     */
     public void waitForMember(int id);
     
+    /**
+     * This method will check if a thief is already at the museum.
+     * @param id thief id.
+     * @return true or false.
+     */
     public boolean atMuseum(int id);
     
+    /**
+     * This method will check if a thief is already at the concentration site.
+     * @param id thief id.
+     * @return true or false.
+     */
     public boolean atConcentration(int id);
     
+    /**
+     * The thieves will wait for all to be ready to craw out.
+     */
     public void waitForReverseDirection();
 }

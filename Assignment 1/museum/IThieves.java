@@ -1,15 +1,19 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package museum;
 
 /**
- *
- * @author João Brito
+ * Thieves interface of Museum instance.
+ * @author João Brito, 68137
  */
 public interface IThieves {
-        
+    
+    /**
+     * This represents the theft of a canvas.
+     * @param id thief identification.
+     * @param RId room number.
+     * @return '0' if there isn't any canvas left, '1' if there is.
+     */
     public int rollACanvas(int id, int RId);
 }

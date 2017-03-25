@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems.
  */
 package concentration_site;
 
@@ -11,8 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author João Brito
+ * Concentration Site instance.
+ * @author João Brito, 68137
  */
 public class ConcentrationSite implements IMaster, IThieves {
     private boolean callAssault = false;
@@ -25,11 +23,18 @@ public class ConcentrationSite implements IMaster, IThieves {
     private final LinkedList<Integer> thieves;
     private final Log log;
 
+    /**
+     * Init the concentration site.
+     */
     public ConcentrationSite() {
         log = Log.getInstance();
         thieves = new LinkedList<>();
     }
     
+    /**
+     * The master will order to the thieves to begin to prepare the assault party.
+     * @param last '0' last assault, '1' if not. Master method.
+     */
     @Override
     public synchronized void prepareAssaultParty(int last) {
         thievesReady = false;
@@ -37,7 +42,6 @@ public class ConcentrationSite implements IMaster, IThieves {
         if(last==0){
             lastAssault = true;
         }
-        System.out.println("Master1 "+counter1+" "+counter2);
         while(counter1!=0 || counter2!=0){
             try {
                 wait();
@@ -45,7 +49,6 @@ public class ConcentrationSite implements IMaster, IThieves {
                 Logger.getLogger(ConcentrationSite.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println("Master2");
         callAssault = true;
         orders = 0;
         notifyAll();
@@ -54,14 +57,13 @@ public class ConcentrationSite implements IMaster, IThieves {
     
     /**
      * The thieves are sleeping in this method waiting for the master inform
-     * the next assault.
-     * @param id
-     * @return order
+     * the next assault. Thieves method.
+     * @param id thief id.
+     * @return order.
      */
     @Override
     public synchronized int amINeeded(int id) {
         this.callAssault = false;
-        //System.out.println(id);
         thieves.add(id);
         if(counter1>0){
             counter1--;
@@ -87,6 +89,9 @@ public class ConcentrationSite implements IMaster, IThieves {
         return orders;
     }
     
+    /**
+     * The master will wait until the thieves are ready to go. Master method.
+     */
     @Override
     public synchronized void waitForPrepareExcursion() {
         while(!this.thievesReady){
@@ -96,9 +101,13 @@ public class ConcentrationSite implements IMaster, IThieves {
                 Logger.getLogger(ConcentrationSite.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println("ThievesReady!");
     }
     
+    /**
+     * The thieves will begin to prepare the excursion to the assault party. Thieves method.
+     * @param id thief id.
+     * @return party number.
+     */
     @Override
     public synchronized int prepareExcursion(int id) {
         int party;
@@ -107,7 +116,6 @@ public class ConcentrationSite implements IMaster, IThieves {
             counter1++;
             party = 1;
             this.log.setAssaultPartyMember(party, counter1, id);
-            System.out.println("counter: "+counter1);
             if(counter1==3){
                 thievesReady = true;
                 notifyAll();
@@ -124,7 +132,6 @@ public class ConcentrationSite implements IMaster, IThieves {
             counter2++;
             party = 2;
             this.log.setAssaultPartyMember(party, counter2, id);
-            System.out.println("counter: "+counter2);
             if(counter2 == 3){
                 thievesReady = true;
                 notifyAll();
@@ -134,6 +141,9 @@ public class ConcentrationSite implements IMaster, IThieves {
         return party;    
     }
     
+    /**
+     * The master will present the result of the heist. Master method.
+     */
     @Override
     public synchronized void sumUpResults() {
         this.orders = 1;

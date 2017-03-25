@@ -1,20 +1,28 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Distributed Systems
  */
 package control_collect_site;
 
 /**
- *
- * @author João Brito
+ * Master interface of Conctrol Collection Site instance.
+ * @author João Brito, 68137
  */
 public interface IMaster {
     
+    /**
+     * Initiates the heist operations.
+     */
     public void startOperations();
     
+    /**
+     * The master will wait until the arrival of the assault party. 
+     */
     public void takeARest();
     
+    /**
+     * The master will decide what to do next.
+     * @return decision.
+     */
     public int[] appraiseSit();
     
 }
