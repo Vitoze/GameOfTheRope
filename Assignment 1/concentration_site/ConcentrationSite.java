@@ -135,6 +135,7 @@ public class ConcentrationSite implements IMaster, IThieves {
     public synchronized void sumUpResults() {
         this.orders = 1;
         this.endHeist = true;
+        log.printResults();
         notifyAll();
     }
     

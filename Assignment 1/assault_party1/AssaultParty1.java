@@ -45,8 +45,6 @@ public class AssaultParty1 implements IMaster, IThieves{
                 Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println(partyReady);
-        //System.out.println(id);
         return room_id;
     }
     
@@ -56,7 +54,7 @@ public class AssaultParty1 implements IMaster, IThieves{
         room_id = log.getAssaultParty1RoomId();
         roomDistance = log.getRoomDistance(room_id);
         System.out.println(nElemParty);
-        while(this.nElemParty<2){
+        while(this.nElemParty<3){
             try {
                 wait();
             } catch (InterruptedException ex) {
@@ -64,15 +62,13 @@ public class AssaultParty1 implements IMaster, IThieves{
             }
         }
         this.nextElemToCrawl = this.log.getAssaultPartyElemId(1, 1);
-        //System.out.println("Primeiro elemento " + nextElemToCrawl);
         this.lastElemToCrawl = this.log.getAssaultPartyElemId(1, 2);
         notifyAll();
     }
     
     @Override
     public synchronized boolean atMuseum(int id) {
-        //return this.log.getAssaultPartyElemPosition(id) == roomDistance;
-        return true;
+        return this.log.getAssaultPartyElemPosition(id) == roomDistance;
     }
 
     @Override
@@ -84,12 +80,11 @@ public class AssaultParty1 implements IMaster, IThieves{
                 Logger.getLogger(AssaultParty1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        //System.out.println(id+" "+nextElemToCrawl);
     }
     
     @Override
     public synchronized void crawlIn(int id) {
-        /*int nextPosition;
+        int nextPosition;
         int nextElemToCrawlPosition = this.log.getAssaultPartyElemPosition(id);
         int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
         int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(this.lastElemToCrawl);
@@ -98,8 +93,8 @@ public class AssaultParty1 implements IMaster, IThieves{
             this.log.printALine();
             first = false;
         }
-        /*if(nextElemToCrawlPosition+nextElemToCrawlMaxDispl>=lastElemToCrawlPosition+3){
-            nextPosition = nextElemToCrawlPosition+3;
+        if(nextElemToCrawlPosition+nextElemToCrawlMaxDispl>=lastElemToCrawlPosition+3){
+            nextPosition = lastElemToCrawlPosition+3;
             if(nextPosition>=roomDistance){
                 nextPosition = roomDistance;
             }
@@ -113,11 +108,7 @@ public class AssaultParty1 implements IMaster, IThieves{
                 setNextElemToCrawl(id);
             }
         }
-        //System.out.println(id + " " + nextPosition + " " + nextElemToCrawl);
-        */
-        //this.log.updateAssautPartyElemPosition(id, nextPosition);  
-        this.log.updateAssautPartyElemPosition(id, roomDistance);
-        setNextElemToCrawl(id);
+        this.log.updateAssautPartyElemPosition(id, nextPosition);
         notifyAll();
     }
     
@@ -131,14 +122,13 @@ public class AssaultParty1 implements IMaster, IThieves{
         this.lastElemToCrawl = id;
         this.nextElemToCrawl = this.log.getAssaultPartyElemId(1,lastToCrawl);
         notifyAll();
-        //System.out.println("here"+nextElemToCrawl);
     }
     
     private int checkPosition(int pos, int id){
         int elem_id;
         for(int i=1;i<=3;i++){
             elem_id=this.log.getAssaultPartyElemId(1, i);
-            if(elem_id!=id && elem_id!=this.lastElemToCrawl){
+            if(elem_id!=id){
                 if(this.log.getAssaultPartyElemPosition(elem_id)==pos && this.log.getAssaultPartyElemPosition(elem_id)!=roomDistance){
                     pos -= 1;
                     break;
@@ -154,7 +144,6 @@ public class AssaultParty1 implements IMaster, IThieves{
         this.lastElemToCrawl = this.log.getAssaultPartyElemId(1, 3);
         counterToCrawlBack++;
         notifyAll();
-        //System.out.println("Waiting");
         while(counterToCrawlBack<3){
             try {
                 wait();
@@ -166,8 +155,7 @@ public class AssaultParty1 implements IMaster, IThieves{
     
     @Override
     public synchronized boolean atConcentration(int id) {
-        //return this.log.getAssaultPartyElemPosition(id) == 0;
-        return true;
+        return this.log.getAssaultPartyElemPosition(id) == 0;
     }
     
     @Override
@@ -176,50 +164,36 @@ public class AssaultParty1 implements IMaster, IThieves{
         int nextElemToCrawlPosition = this.log.getAssaultPartyElemPosition(id);
         int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
         int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(this.lastElemToCrawl);
-        // If pos(id)+md>pos(id-1)+3
+        
         if(first){
             this.log.printALine();
             first = false;
         }
-        if(nextElemToCrawlPosition-nextElemToCrawlMaxDispl<lastElemToCrawlPosition-3){
+        if(nextElemToCrawlPosition-nextElemToCrawlMaxDispl<=lastElemToCrawlPosition-3){
             nextPosition = lastElemToCrawlPosition-3;
-            // If distance > roomPos
-            if(nextPosition < 0){
+            if(nextPosition<=0){
                 nextPosition = 0;
             }
-            this.lastElemToCrawl = id;
+            nextPosition = checkPositionBack(nextPosition,id);
             setNextElemToCrawl(id);
-            //notifyAll();
         }else{
-            if(nextElemToCrawlPosition-nextElemToCrawlMaxDispl==lastElemToCrawlPosition){
-                if(lastElemToCrawlPosition == 0){
-                    nextPosition = 0;
-                    this.lastElemToCrawl = id;
-                    setNextElemToCrawl(id);
-                }else{
-                    nextPosition = lastElemToCrawlPosition+1;
-                }
-            }else{
-                nextPosition = nextElemToCrawlPosition-nextElemToCrawlMaxDispl;
-                nextPosition = checkPositionBack(nextPosition,id);
-                if(nextPosition <= 0){
-                    nextPosition = 0;
-                    this.lastElemToCrawl = id;
-                    setNextElemToCrawl(id);
-                }
+            nextPosition = nextElemToCrawlPosition-nextElemToCrawlMaxDispl;
+            nextPosition = checkPositionBack(nextPosition,id);
+            if(nextPosition <= 0){
+                nextPosition = 0;
+                setNextElemToCrawl(id);
             }
         }
-        //System.out.println(id + " " + nextPosition + " " + nextElemToCrawl);
         this.log.updateAssautPartyElemPosition(id, nextPosition);
-        //notifyAll();
+        notifyAll();
     }
     
     private int checkPositionBack(int pos, int id){
         int elem_id;
         for(int i=1;i<=3;i++){
             elem_id=this.log.getAssaultPartyElemId(1, i);
-            if(elem_id!=id && elem_id!=this.lastElemToCrawl){
-                if(this.log.getAssaultPartyElemPosition(elem_id)==pos){
+            if(elem_id!=id){
+                if(this.log.getAssaultPartyElemPosition(elem_id)==pos && this.log.getAssaultPartyElemPosition(elem_id)!=0){
                     pos += 1;
                     break;
                 }
