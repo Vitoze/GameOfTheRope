@@ -18,34 +18,26 @@ import java.util.*;
  * 
  * @author João Brito, 68137
  */
-public class Main {
-    private static ControlCollectionSite control;
-    private static ConcentrationSite concentration;
-    private static Museum museum;
-    private static Master master;
-    private static Log log;
-    private static AssaultParty party1;
-    private static AssaultParty party2;
-    private static Thieves [] thieves;
-    
+public class Main {    
     
     public static void main(String[] args) {
         /* Start the entities */
-        int nThieves = Heist.N_THIEVES;
+        int nThieves = Heist.init.getN_thieves();
         
-        museum = new Museum();
-        concentration = new ConcentrationSite();
-        control = new ControlCollectionSite();
-        party1 = new AssaultParty();
-        party2 = new AssaultParty();
-        log = Log.getInstance();
+        Museum museum = new Museum();
+        ConcentrationSite concentration = new ConcentrationSite();
+        ControlCollectionSite control = new ControlCollectionSite();
+        AssaultParty party1 = new AssaultParty();
+        AssaultParty party2 = new AssaultParty();
+        Log log = Log.getInstance();
         
-        master = new Master((control_collect_site.IMaster) control, (concentration_site.IMaster) concentration, (assault_party.IMaster) party1, (assault_party.IMaster) party2);
         
-        thieves = new Thieves[nThieves];
+        Master master = new Master((control_collect_site.IMaster) control, (concentration_site.IMaster) concentration, (assault_party.IMaster) party1, (assault_party.IMaster) party2);
+        
+        Thieves [] thieves = new Thieves[nThieves];
         for(int i = 0; i<nThieves; i++){
             Random rand = new Random();
-            int md = rand.nextInt(Heist.THIEF_MAX_MD+1-Heist.THIEF_MIN_MD) + Heist.THIEF_MIN_MD;
+            int md = rand.nextInt(Heist.init.getThief_max_md()+1-Heist.init.getThief_min_md()) + Heist.init.getThief_min_md();
             thieves[i] = new Thieves(i+1,md,(museum.IThieves) museum, (assault_party.IThieves) party1, (assault_party.IThieves) party2, (concentration_site.IThieves) concentration, (control_collect_site.IThieves) control);
         }
         

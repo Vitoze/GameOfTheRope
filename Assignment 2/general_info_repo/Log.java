@@ -74,50 +74,7 @@ public class Log {
     private void writeInit(){
         try{
             pw = new PrintWriter(log);
-            pw.println("                            Heist to the Museum - Description of the internal state");
-            
-            String head = "MstT";
-            for(int i=1; i<=6; i++){
-                head += "   Thief " + Integer.toString(i)+"   ";
-            }
-            pw.println(head);
-            
-            head = "Stat  ";
-            for(int i=1; i<=6; i++){
-                head += "Stat S MD    ";
-            }
-            pw.println(head);
-            pw.print("                   ");
-            head = "Assault party 1                       Assault party 2                         Museum";
-            pw.println(head);
-            
-            head = "           ";
-            for(int i=1; i<=3; i++){
-                head+= "Elem " + Integer.toString(i)+"     ";
-            }
-            head += "     ";
-            for(int i=1; i<=3; i++){
-                head+= "Elem " + Integer.toString(i)+"     ";
-            }
-            head += "";
-            for(int i=1; i<=5; i++){
-                head+= "Room " + Integer.toString(i)+"  ";
-            }
-            pw.println(head);
-            
-            head = "    RId  ";
-            for(int i=1; i<=3; i++){
-                head+= "Id Pos Cv  ";
-            }
-            head += "RId  ";
-            for(int i=1; i<=3; i++){
-                head+= "Id Pos Cv  ";
-            }
-            head += "  ";
-            for(int i=1; i<=5; i++){
-                head+= " NP DT  ";
-            }
-            pw.println(head);
+            pw.println("                            Heist to the Museum - Description of the internal state");            
             
             pw.flush();
         }catch(FileNotFoundException ex){
@@ -363,6 +320,21 @@ public class Log {
      * This method will update the states log.
      */
     private void printStatesLine(){
+        
+        pw.println(); 
+        
+        String h = "MstT";
+        for(int i=1; i<=6; i++){
+            h += "   Thief " + Integer.toString(i)+"   ";
+        }
+        pw.println(h);
+
+        h = "Stat  ";
+        for(int i=1; i<=6; i++){
+            h += "Stat S MD    ";
+        }
+        pw.println(h);
+        
         pw.print(this.heist.getMasterState());
         pw.print("  ");
         
@@ -374,8 +346,9 @@ public class Log {
             pw.print(this.heist.getThiefMaxDisplacement(i));
             pw.print("    ");
         }
-        
+               
         pw.println();
+
         pw.flush();
     }
     
@@ -383,6 +356,41 @@ public class Log {
      * This method will update the assault log.
      */
     private void printAssaultLine(){
+        pw.println();
+        String h = "";
+        
+        pw.print("                   ");
+        h = "Assault party 1                       Assault party 2                         Museum";
+        pw.println(h);
+
+        h = "           ";
+        for(int i=1; i<=3; i++){
+            h += "Elem " + Integer.toString(i)+"     ";
+        }
+        h += "     ";
+        for(int i=1; i<=3; i++){
+            h += "Elem " + Integer.toString(i)+"     ";
+        }
+        h += "";
+        for(int i=1; i<=5; i++){
+            h += "Room " + Integer.toString(i)+"  ";
+        }
+        pw.println(h);
+
+        h = "    RId  ";
+        for(int i=1; i<=3; i++){
+            h += "Id Pos Cv  ";
+        }
+        h += "RId  ";
+        for(int i=1; i<=3; i++){
+            h += "Id Pos Cv  ";
+        }
+        h += "  ";
+        for(int i=1; i<=5; i++){
+            h += " NP DT  ";
+        }
+        pw.println(h);
+        
         pw.print("     ");
         pw.print(this.heist.getAssaultParty1Rid());
         pw.print("    ");

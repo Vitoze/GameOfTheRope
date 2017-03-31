@@ -12,14 +12,8 @@ import java.util.HashMap;
  *  @author João Brito, 68137
  */
 public class Heist{
-    public static final int N_ROOMS = 5;
-    public static final int N_THIEVES = 6;
-    public static final int THIEF_MIN_MD = 2;
-    public static final int THIEF_MAX_MD = 6;
-    public static final int N_MIN_PAINTINGS = 8;
-    public static final int N_MAX_PAINTINGS = 16;
-    public static final int N_MIN_DISTANCE = 15;
-    public static final int N_MAX_DISTANCE = 30;
+ 
+    public static final Initialization init = new Initialization(5, 6, 2, 6, 8, 16, 15, 30);
     
     private int totalPaintings;
     private int assault_party1_Rid;

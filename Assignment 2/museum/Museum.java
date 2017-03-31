@@ -18,11 +18,11 @@ public class Museum implements IThieves{
      */
     public Museum(){
         this.log = Log.getInstance();
-        for(int i=1; i<=Heist.N_ROOMS; i++){
+        for(int i=1; i<=Heist.init.getN_rooms(); i++){
             Random rand = new Random();
             //random.nextInt(max + 1 - min) + min
-            int dt = rand.nextInt(Heist.N_MAX_DISTANCE+1-Heist.N_MIN_DISTANCE) + Heist.N_MIN_DISTANCE;
-            int np = rand.nextInt(Heist.N_MAX_PAINTINGS+1-Heist.N_MIN_PAINTINGS) + Heist.N_MIN_PAINTINGS;
+            int dt = rand.nextInt(Heist.init.getN_max_distance()+1-Heist.init.getN_min_distance()) + Heist.init.getN_min_distance();
+            int np = rand.nextInt(Heist.init.getN_max_paintings()+1-Heist.init.getN_min_paintings()) + Heist.init.getN_max_paintings();
             log.initMuseum(i,dt,np);
             //System.out.println(i+" "+np);
         }

@@ -33,7 +33,7 @@ public class ControlCollectionSite implements IMaster, IThieves {
      */
     @Override
     public void startOperations() {
-        for(int rid=1; rid<=Heist.N_ROOMS; rid++){
+        for(int rid=1; rid<=Heist.init.getN_rooms(); rid++){
             museum.put(rid, true);
         }
     }
@@ -50,7 +50,7 @@ public class ControlCollectionSite implements IMaster, IThieves {
         int assault_party2_rid = 0;
         int decision[] = new int[2];
         decision[0] = 1;
-        for(int rid=1; rid<=Heist.N_ROOMS; rid++){
+        for(int rid=1; rid<=Heist.init.getN_rooms(); rid++){
             if(museum.get(rid)){
                 assault_party1_rid = rid;
                 break;
@@ -61,13 +61,13 @@ public class ControlCollectionSite implements IMaster, IThieves {
             decision[0] = 2;
             return decision;
         }
-        if(assault_party1_rid==Heist.N_ROOMS){
+        if(assault_party1_rid==Heist.init.getN_rooms()){
             assault_party2_rid = decision[1] = 0;
             nElemToWait = 3;
             log.setAssaultPartyAction(assault_party1_rid, assault_party2_rid);
             return decision;
         }else{
-            for(int rid=assault_party1_rid+1; rid<=Heist.N_ROOMS; rid++){
+            for(int rid=assault_party1_rid+1; rid<=Heist.init.getN_rooms(); rid++){
                 if(museum.get(rid)){
                     assault_party2_rid = rid;
                     break;
