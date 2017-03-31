@@ -3,7 +3,7 @@
  */
 package museum;
 
-import general_info_repo.Heist;
+import main.SimulParam;
 import general_info_repo.Log;
 import java.util.Random;
 /**
@@ -18,11 +18,11 @@ public class Museum implements IThieves{
      */
     public Museum(){
         this.log = Log.getInstance();
-        for(int i=1; i<=Heist.N_ROOMS; i++){
+        for(int i=1; i<=SimulParam.N_ROOMS; i++){
             Random rand = new Random();
             //random.nextInt(max + 1 - min) + min
-            int dt = rand.nextInt(Heist.N_MAX_DISTANCE+1-Heist.N_MIN_DISTANCE) + Heist.N_MIN_DISTANCE;
-            int np = rand.nextInt(Heist.N_MAX_PAINTINGS+1-Heist.N_MIN_PAINTINGS) + Heist.N_MIN_PAINTINGS;
+            int dt = rand.nextInt(SimulParam.N_MAX_DISTANCE+1-SimulParam.N_MIN_DISTANCE) + SimulParam.N_MIN_DISTANCE;
+            int np = rand.nextInt(SimulParam.N_MAX_PAINTINGS+1-SimulParam.N_MIN_PAINTINGS) + SimulParam.N_MIN_PAINTINGS;
             log.initMuseum(i,dt,np);
             //System.out.println(i+" "+np);
         }
@@ -38,6 +38,7 @@ public class Museum implements IThieves{
     public synchronized int rollACanvas(int id, int rid) {
         if(log.getMuseumPaintings(rid)>0){
             log.updateMuseum(rid, log.getMuseumPaintings(rid)-1);
+            log.updateAssaultPartyElemCv(id, 1);
             //System.out.println("Here");
             return 1;
         }else{

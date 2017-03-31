@@ -3,9 +3,10 @@
  */
 package control_collect_site;
 
+import entities.MasterState;
 import java.util.HashMap;
 import general_info_repo.Log;
-import general_info_repo.Heist;
+import main.SimulParam;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +18,8 @@ public class ControlCollectionSite implements IMaster, IThieves {
     private boolean canvasCollected = false;
     private final HashMap<Integer, Boolean> museum;
     private int nElemToWait = 0;
+    private int elemParty1 = 3;
+    private int elemParty2 = 3;
     private final Log log;
     
     /**
@@ -33,9 +36,11 @@ public class ControlCollectionSite implements IMaster, IThieves {
      */
     @Override
     public void startOperations() {
-        for(int rid=1; rid<=Heist.N_ROOMS; rid++){
+        for(int rid=1; rid<=SimulParam.N_ROOMS; rid++){
             museum.put(rid, true);
         }
+        log.newHeist();
+        log.setMasterState(MasterState.DECIDING_WHAT_TO_DO);
     }
     
     /**
@@ -45,12 +50,15 @@ public class ControlCollectionSite implements IMaster, IThieves {
     @Override
     public synchronized int[] appraiseSit() {
         nElemToWait = 6;
+        elemParty1 = 3;
+        elemParty2 = 3;
         canvasCollected = false;
+        log.initAssaultPartyElemId();
         int assault_party1_rid = 0;
         int assault_party2_rid = 0;
         int decision[] = new int[2];
         decision[0] = 1;
-        for(int rid=1; rid<=Heist.N_ROOMS; rid++){
+        for(int rid=1; rid<=SimulParam.N_ROOMS; rid++){
             if(museum.get(rid)){
                 assault_party1_rid = rid;
                 break;
@@ -61,13 +69,13 @@ public class ControlCollectionSite implements IMaster, IThieves {
             decision[0] = 2;
             return decision;
         }
-        if(assault_party1_rid==Heist.N_ROOMS){
+        if(assault_party1_rid==SimulParam.N_ROOMS){
             assault_party2_rid = decision[1] = 0;
             nElemToWait = 3;
             log.setAssaultPartyAction(assault_party1_rid, assault_party2_rid);
             return decision;
         }else{
-            for(int rid=assault_party1_rid+1; rid<=Heist.N_ROOMS; rid++){
+            for(int rid=assault_party1_rid+1; rid<=SimulParam.N_ROOMS; rid++){
                 if(museum.get(rid)){
                     assault_party2_rid = rid;
                     break;
@@ -91,6 +99,7 @@ public class ControlCollectionSite implements IMaster, IThieves {
                 Logger.getLogger(ControlCollectionSite.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        log.setMasterState(MasterState.DECIDING_WHAT_TO_DO);
     }
     
     /**
@@ -100,7 +109,7 @@ public class ControlCollectionSite implements IMaster, IThieves {
      * @param cv has canvas? 0 or 1.
      */
     @Override
-    public synchronized void handACanvas(int id, int rid, int cv) {
+    public synchronized void handACanvas(int id, int party, int rid, int cv) {
         if(cv==0){
             museum.replace(rid, false);
         }
@@ -109,7 +118,20 @@ public class ControlCollectionSite implements IMaster, IThieves {
             canvasCollected = true;
             notify();
         }
+        log.updateThiefSituation(id, 'W');
         log.updateAssaultPartyElemCv(id, 0);
+        log.updateAssaultPartyElemId(party, id);
+        if(party==1){
+            elemParty1--;
+            if(elemParty1==0){
+                log.setAssaultParty1RoomId(0);
+            }
+        }else{
+            elemParty2--;
+            if(elemParty2==0){
+                log.setAssaultParty2RoomId(0);
+            }
+        }
     }
        
 }

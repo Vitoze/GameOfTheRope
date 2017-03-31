@@ -1,7 +1,7 @@
 /*
  * Distributed Systems
  */
-package assault_party2;
+package assault_party;
 
 /**
  * Master interface of AssaultParty#2 instance.
@@ -11,6 +11,7 @@ public interface IMaster {
     
     /**
      * The Master will send the assault party out.
+     * @param aid assault party id
      */
-    public void sendAssaultParty();
+    public void sendAssaultParty(int aid);
 }

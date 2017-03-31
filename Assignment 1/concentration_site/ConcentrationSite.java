@@ -3,6 +3,8 @@
  */
 package concentration_site;
 
+import entities.MasterState;
+import entities.ThievesState;
 import general_info_repo.Log;
 import java.util.LinkedList;
 import java.util.logging.Level;
@@ -49,8 +51,10 @@ public class ConcentrationSite implements IMaster, IThieves {
                 Logger.getLogger(ConcentrationSite.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        log.setMasterState(MasterState.ASSEMBLING_A_GROUP);
         callAssault = true;
         orders = 0;
+        System.out.println("Here");
         notifyAll();
         
     }
@@ -94,6 +98,7 @@ public class ConcentrationSite implements IMaster, IThieves {
      */
     @Override
     public synchronized void waitForPrepareExcursion() {
+        System.out.println("Here Master");
         while(!this.thievesReady){
             try {
                 wait();
@@ -138,6 +143,7 @@ public class ConcentrationSite implements IMaster, IThieves {
             }
         }
         this.log.updateThiefSituation(id, 'P');
+        log.setThiefState(ThievesState.CRAWLING_INWARDS, id);
         return party;    
     }
     
@@ -148,6 +154,7 @@ public class ConcentrationSite implements IMaster, IThieves {
     public synchronized void sumUpResults() {
         this.orders = 1;
         this.endHeist = true;
+        log.setMasterState(MasterState.PRESENTING_THE_REPORT);
         notifyAll();
     }
     

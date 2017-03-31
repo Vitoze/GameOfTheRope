@@ -149,7 +149,9 @@ public class Log {
      *  This method will be called on the start of the heist
      */
     public synchronized void newHeist(){
-       this.printStatesLine();
+        initAssaultPartyElemId();
+        printStatesLine();
+        printAssaultLine();
     }
     
     /**
@@ -169,6 +171,7 @@ public class Log {
         this.heist.setMasterState(state);
         if(tmp!=state){
             this.printStatesLine();
+            this.printAssaultLine();
         }
     }
     
@@ -204,6 +207,7 @@ public class Log {
         this.heist.setThievesState(id, state);
         if(tmp!=state){
             this.printStatesLine();
+            this.printAssaultLine();
         }
     }
     
@@ -234,7 +238,6 @@ public class Log {
      */
     public synchronized void updateMuseum(int rid, int np){
         this.heist.setMuseumRoomsPaintings(rid, np);
-        this.printAssaultLine();
     }
     
     /**
@@ -287,6 +290,14 @@ public class Log {
         return this.heist.getAssaultPartyElemId(party, i);
     }
     
+    public synchronized void initAssaultPartyElemId(){
+        this.heist.initAssaultPartyElemId();
+    }
+    
+    public synchronized void updateAssaultPartyElemId(int party, int id){
+        this.heist.setAssaultPartyElemId(party, this.getAssaultPartyElemNumber(id), 0);
+    }
+    
     /**
      * This method will return the assault party member position.
      * @param id thief identification.
@@ -304,12 +315,20 @@ public class Log {
         return this.heist.getAssaultParty1Rid();
     }
     
+    public synchronized void setAssaultParty1RoomId(int rid){
+        this.heist.setAssaultParty1Rid(rid);
+    }
+    
     /**
      * This method will return the assault party #2 room number to assault.
      * @return museum room number.
      */
     public synchronized int getAssaultParty2RoomId(){
         return this.heist.getAssaultParty2Rid();
+    }
+    
+    public synchronized void setAssaultParty2RoomId(int rid){
+        this.heist.setAssaultParty2Rid(rid);
     }
     
     /**
@@ -319,6 +338,7 @@ public class Log {
      */
     public synchronized void updateAssautPartyElemPosition(int id, int pos){
         this.heist.setAssaultPartyElemPos(id, pos);
+        this.printStatesLine();
         this.printAssaultLine();
     }
     
@@ -339,6 +359,7 @@ public class Log {
      */
     public synchronized void updateAssaultPartyElemCv(int id, int cv){
         this.heist.setAssaultPartyElemCv(id, cv);
+        this.printStatesLine();
         this.printAssaultLine();
     }
     
@@ -384,15 +405,37 @@ public class Log {
      */
     private void printAssaultLine(){
         pw.print("     ");
-        pw.print(this.heist.getAssaultParty1Rid());
-        pw.print("    ");
-        for(int i = 1; i<=3; i++){
-            pw.print(this.heist.getAssaultPartyElemId(1, i));
-            pw.print("  ");
-            pw.print(String.format("%1$2s", this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(1, i))));
-            pw.print("  ");
-            pw.print(this.heist.getAssaultPartyElemCv(1, i));
-            pw.print("   ");
+        if(this.heist.getAssaultParty1Rid()==0){
+            pw.print("-");
+            pw.print("    ");
+            for(int i = 1; i<=3; i++){
+                pw.print("-");
+                pw.print("  ");
+                pw.print(String.format("%1$2s", "-"));
+                pw.print("  ");
+                pw.print("-");
+                pw.print("   ");
+            }
+        }else{
+            pw.print(this.heist.getAssaultParty1Rid());
+            pw.print("    ");
+            for(int i = 1; i<=3; i++){
+                if(this.heist.getAssaultPartyElemId(1, i)==0){
+                    pw.print("-");
+                    pw.print("  ");
+                    pw.print(String.format("%1$2s", "-"));
+                    pw.print("  ");
+                    pw.print("-");
+                    pw.print("   ");
+                }else{
+                    pw.print(this.heist.getAssaultPartyElemId(1, i));
+                    pw.print("  ");
+                    pw.print(String.format("%1$2s", this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(1, i))));
+                    pw.print("  ");
+                    pw.print(this.heist.getAssaultPartyElemCv(1, i));
+                    pw.print("   ");
+                }
+            }
         }
         if(this.heist.getAssaultParty2Rid()==0){
             pw.print("-");
@@ -410,12 +453,21 @@ public class Log {
             pw.print(this.heist.getAssaultParty2Rid());
             pw.print("    ");
             for(int i = 1; i<=3; i++){
-                pw.print(this.heist.getAssaultPartyElemId(2, i));
-                pw.print("  ");
-                pw.print(String.format("%1$2s", this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(2, i))));
-                pw.print("  ");
-                pw.print(this.heist.getAssaultPartyElemCv(2, i));
-                pw.print("   ");
+                if(this.heist.getAssaultPartyElemId(2, i)==0){
+                    pw.print("-");
+                    pw.print("  ");
+                    pw.print(String.format("%1$2s", "-"));
+                    pw.print("  ");
+                    pw.print("-");
+                    pw.print("   ");
+                }else{
+                    pw.print(this.heist.getAssaultPartyElemId(2, i));
+                    pw.print("  ");
+                    pw.print(String.format("%1$2s", this.heist.getAssaultPartyElemPos(this.heist.getAssaultPartyElemId(2, i))));
+                    pw.print("  ");
+                    pw.print(this.heist.getAssaultPartyElemCv(2, i));
+                    pw.print("   ");
+                }
             }
             pw.print("  ");
         }

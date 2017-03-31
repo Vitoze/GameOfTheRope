@@ -12,15 +12,6 @@ import java.util.HashMap;
  *  @author João Brito, 68137
  */
 public class Heist{
-    public static final int N_ROOMS = 5;
-    public static final int N_THIEVES = 6;
-    public static final int THIEF_MIN_MD = 2;
-    public static final int THIEF_MAX_MD = 6;
-    public static final int N_MIN_PAINTINGS = 8;
-    public static final int N_MAX_PAINTINGS = 16;
-    public static final int N_MIN_DISTANCE = 15;
-    public static final int N_MAX_DISTANCE = 30;
-    
     private int totalPaintings;
     private int assault_party1_Rid;
     private int assault_party2_Rid;
@@ -199,6 +190,27 @@ public class Heist{
             this.assault_party.get(party).replace(i, id);
         }else{
             this.assault_party.get(party).put(i, id);
+        }
+    }
+    
+    public synchronized void initAssaultPartyElemId(){
+        for(int i=1; i<=3;i++){
+            if(!this.assault_party.containsKey(1)){
+                this.assault_party.put(1, new HashMap<>());
+            }
+            if(!this.assault_party.containsKey(2)){
+                this.assault_party.put(2, new HashMap<>());
+            }
+            if(this.assault_party.get(1).containsKey(i)){
+                this.assault_party.get(1).replace(i, 0);
+            }else{
+                this.assault_party.get(1).put(i, 0);
+            }
+            if(this.assault_party.get(2).containsKey(i)){
+                this.assault_party.get(2).replace(i, 0);
+            }else{
+                this.assault_party.get(2).put(i, 0);
+            }
         }
     }
     

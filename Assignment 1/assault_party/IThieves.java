@@ -1,7 +1,7 @@
 /*
  * Distributed Systems
  */
-package assault_party2;
+package assault_party;
 
 /**
  * Tieves interface of AssaultParty#2 instance.
@@ -52,5 +52,5 @@ public interface IThieves {
     /**
      * The thieves will wait for all to be ready to craw out.
      */
-    public void waitForReverseDirection();
+    public void waitForReverseDirection(int id);
 }

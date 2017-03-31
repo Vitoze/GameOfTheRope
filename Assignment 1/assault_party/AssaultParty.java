@@ -1,20 +1,22 @@
 /*
  * Distributed Systems
  */
-package assault_party2;
+package assault_party;
 
+import entities.MasterState;
+import entities.ThievesState;
 import general_info_repo.Log;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Assault party#2 instance.
+ * Assault party#1 instance.
  * @author João Brito, 68137
  */
-public class AssaultParty2 implements IMaster, IThieves{
+public class AssaultParty implements IMaster, IThieves{
     private boolean partyReady = false;
-    private boolean first = true;
+    private int party_number = 0;
     private int counterToCrawlBack = 0;
     private int room_id;
     private int nElemParty = 0;
@@ -23,9 +25,9 @@ public class AssaultParty2 implements IMaster, IThieves{
     private final Log log;
     
     /**
-     * Init the assault party#2.
+     * Init the assault party#1.
      */
-    public AssaultParty2(){
+    public AssaultParty(){
         this.log = Log.getInstance();
         nextElem = new LinkedList<>();
     }
@@ -40,18 +42,17 @@ public class AssaultParty2 implements IMaster, IThieves{
     public synchronized int waitForSendAssaultParty(int id, int md) {
         partyReady=false;
         if(nElemParty==3){
-            first = true;
-            counterToCrawlBack=0;
             nElemParty=0;
+            counterToCrawlBack = 0;
             notifyAll();
         }
         nElemParty++;
-        notify();
+        notifyAll();
         while(!partyReady){
             try {
                 wait();
             } catch (InterruptedException ex) {
-                Logger.getLogger(AssaultParty2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return room_id;
@@ -61,24 +62,36 @@ public class AssaultParty2 implements IMaster, IThieves{
      * The Master will send the assault party. Master method.
      */
     @Override
-    public synchronized void sendAssaultParty() {
+    public synchronized void sendAssaultParty(int aid) {
+        party_number = aid;
         partyReady = false;
-        room_id = log.getAssaultParty2RoomId();
+        if(party_number == 1){
+            room_id = log.getAssaultParty1RoomId();
+        }else{
+            room_id = log.getAssaultParty2RoomId();
+        }
         roomDistance = log.getRoomDistance(room_id);
         while(this.nElemParty<3){
             try {
                 wait();
             } catch (InterruptedException ex) {
-                Logger.getLogger(AssaultParty2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        partyReady=true;
+        partyReady = true;
         while(!nextElem.isEmpty()){
             nextElem.remove();
         }
-        nextElem.add(this.log.getAssaultPartyElemId(2, 1));
-        nextElem.add(this.log.getAssaultPartyElemId(2, 2));
-        nextElem.add(this.log.getAssaultPartyElemId(2, 3));
+        if(party_number == 1){
+            nextElem.add(this.log.getAssaultPartyElemId(1, 1));
+            nextElem.add(this.log.getAssaultPartyElemId(1, 2));
+            nextElem.add(this.log.getAssaultPartyElemId(1, 3));
+        }else{
+            nextElem.add(this.log.getAssaultPartyElemId(2, 1));
+            nextElem.add(this.log.getAssaultPartyElemId(2, 2));
+            nextElem.add(this.log.getAssaultPartyElemId(2, 3));
+        }
+        log.setMasterState(MasterState.WAITING_FOR_GROUP_ARRIVAL);
         notifyAll();
     }
     
@@ -89,7 +102,11 @@ public class AssaultParty2 implements IMaster, IThieves{
      */
     @Override
     public synchronized boolean atMuseum(int id) {
-        return this.log.getAssaultPartyElemPosition(id) == roomDistance;
+        if(log.getAssaultPartyElemPosition(id) == roomDistance){
+            log.setThiefState(ThievesState.AT_A_ROOM, id);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -102,7 +119,7 @@ public class AssaultParty2 implements IMaster, IThieves{
             try {
                 wait();
             } catch (InterruptedException ex) {
-                Logger.getLogger(AssaultParty2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -118,10 +135,6 @@ public class AssaultParty2 implements IMaster, IThieves{
         int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
         int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(nextElem.getLast());
         
-        if(first){
-            this.log.printALine();
-            first = false;
-        }
         if(nextElemToCrawlPosition+nextElemToCrawlMaxDispl>=lastElemToCrawlPosition+3){
             nextPosition = lastElemToCrawlPosition+3;
             if(nextPosition>=roomDistance){
@@ -160,7 +173,7 @@ public class AssaultParty2 implements IMaster, IThieves{
     private int checkPosition(int pos, int id){
         int elem_id;
         for(int i=1;i<=3;i++){
-            elem_id=this.log.getAssaultPartyElemId(2, i);
+            elem_id=this.log.getAssaultPartyElemId(party_number, i);
             if(elem_id!=id){
                 if(this.log.getAssaultPartyElemPosition(elem_id)==pos && this.log.getAssaultPartyElemPosition(elem_id)!=roomDistance){
                     pos -= 1;
@@ -173,16 +186,18 @@ public class AssaultParty2 implements IMaster, IThieves{
 
     /**
      * The thieves will await for all to be prepare to crawl out. Thieves method.
+     * @param id thief identification
      */
     @Override
-    public synchronized void waitForReverseDirection() {
+    public synchronized void waitForReverseDirection(int id) {
         counterToCrawlBack++;
+        log.setThiefState(ThievesState.CRAWLING_OUTWARDS, id);
         notifyAll();
         while(counterToCrawlBack<3){
             try {
                 wait();
             } catch (InterruptedException ex) {
-                Logger.getLogger(AssaultParty2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -194,7 +209,11 @@ public class AssaultParty2 implements IMaster, IThieves{
      */
     @Override
     public synchronized boolean atConcentration(int id) {
-        return this.log.getAssaultPartyElemPosition(id) == 0;
+        if(this.log.getAssaultPartyElemPosition(id) == 0){
+            log.setThiefState(ThievesState.OUTSIDE, id);
+            return true;
+        }
+        return false;
     }
     
     /**
@@ -208,10 +227,6 @@ public class AssaultParty2 implements IMaster, IThieves{
         int nextElemToCrawlMaxDispl = this.log.getThiefMaxDisplacement(id);
         int lastElemToCrawlPosition = this.log.getAssaultPartyElemPosition(nextElem.getLast());
         
-        if(first){
-            this.log.printALine();
-            first = false;
-        }
         if(nextElemToCrawlPosition-nextElemToCrawlMaxDispl<=lastElemToCrawlPosition-3){
             nextPosition = lastElemToCrawlPosition-3;
             if(nextPosition<=0){
@@ -239,8 +254,8 @@ public class AssaultParty2 implements IMaster, IThieves{
     private int checkPositionBack(int pos, int id){
         int elem_id;
         for(int i=1;i<=3;i++){
-            elem_id=this.log.getAssaultPartyElemId(2, i);
-            if(elem_id!=id){
+            elem_id=this.log.getAssaultPartyElemId(1, i);
+            if(elem_id!=id && elem_id!=0){
                 if(this.log.getAssaultPartyElemPosition(elem_id)==pos && this.log.getAssaultPartyElemPosition(elem_id)!=0){
                     pos += 1;
                     break;
@@ -249,5 +264,5 @@ public class AssaultParty2 implements IMaster, IThieves{
         }
         return pos;
     }
-    
+
 }
