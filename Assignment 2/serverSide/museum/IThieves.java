@@ -1,6 +1,3 @@
-/*
- * Distributed Systems
- */
 package serverSide.museum;
 
 /**

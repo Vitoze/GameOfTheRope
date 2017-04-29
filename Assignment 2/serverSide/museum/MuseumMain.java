@@ -21,7 +21,7 @@ public class MuseumMain {
         ClientProxy cliProxy;
         
         /* estabelecimento do serviço */
-        scon = new ServerCom(SimulConfig.concentrationServerPort);
+        scon = new ServerCom(SimulConfig.museumServerPort);
         scon.start();
         
         Museum museum = new Museum();

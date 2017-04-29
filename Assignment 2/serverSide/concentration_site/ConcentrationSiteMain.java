@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.SocketException;
 
 /**
- *
+ * Concentration Site Communication Interface Stub
  * @author João Brito
  */
 public class ConcentrationSiteMain {
@@ -25,7 +25,7 @@ public class ConcentrationSiteMain {
         
         ConcentrationSite concentration = new ConcentrationSite();
         ConcentrationSiteInterface concentrationInterface = new ConcentrationSiteInterface(concentration);
-        System.out.println("******************************************************************\nControl service has started!");
+        System.out.println("******************************************************************\nConcentration Site service has started!");
         System.out.println("Server is listening.\n******************************************************************");
         
         /* processamento de dados */

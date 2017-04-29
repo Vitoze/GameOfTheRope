@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.net.SocketException;
 
 /**
- * Assault Party #1 Main
+ * Assault Party #2 Main
  * @author João Brito
  */
-public class AssaultPartyMain {
+public class AssaultParty2Main {
     
     public static void main(String[] args) throws SocketException, IOException{
         
@@ -21,7 +21,7 @@ public class AssaultPartyMain {
         ClientProxy cliProxy;
         
         /* estabelecimento do serviço */
-        scon = new ServerCom(SimulConfig.partyServerPort);
+        scon = new ServerCom(SimulConfig.party2ServerPort);
         scon.start();
         
         AssaultParty party = new AssaultParty();

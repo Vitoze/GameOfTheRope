@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.SocketException;
 
 /**
- *
+ * Log Main.
  * @author João Brito
  */
 public class LogMain {

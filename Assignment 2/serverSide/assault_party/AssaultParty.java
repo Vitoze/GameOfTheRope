@@ -1,6 +1,3 @@
-/*
- * Distributed Systems
- */
 package serverSide.assault_party;
 
 import clientSide.Master.MasterState;
@@ -269,6 +266,10 @@ public class AssaultParty implements IMaster, IThieves{
 
     /* ASSAULT_PARTY AS A CLIENT */
     
+    /**
+     * Get Assault Party1 server com.
+     * @return room id
+     */
     private int getAssaultParty1RoomId() {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -294,6 +295,10 @@ public class AssaultParty implements IMaster, IThieves{
         return out;
     }
 
+    /**
+     * ServerCom, Get assault party 2 room id.
+     * @return room id
+     */
     private int getAssaultParty2RoomId() {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -319,14 +324,71 @@ public class AssaultParty implements IMaster, IThieves{
         return out;
     }
 
+    /**
+     * ServerCom, get room distance.
+     * @param room_id room number
+     * @return distance to room
+     */
     private int getRoomDistance(int room_id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
+        Message inMessage, outMessage;
+        
+        while(!con.open()){
+            try{
+                sleep((long) (10));
+            }catch(InterruptedException e){}
+        }
+        outMessage = new Message(MessageType.GET_DISTANCE, room_id);
+        con.writeObject(outMessage);
+        
+        inMessage = (Message) con.readObject();
+        MessageType type = inMessage.getType();
+        if(type != MessageType.RESPONSE_INTEGER){
+            System.out.println("Party: Tipo inválido!");
+            System.out.println("Message:"+ inMessage.toString());
+            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
+            System.exit(1);
+        }
+        int out = inMessage.getInteger();
+        con.close();
+        return out;
     }
 
+    /**
+     * ServerCom, get assault party element id
+     * @param party party number
+     * @param i element number
+     * @return thief id
+     */
     private int getAssaultPartyElemId(int party, int i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
+        Message inMessage, outMessage;
+        
+        while(!con.open()){
+            try{
+                sleep((long) (10));
+            }catch(InterruptedException e){}
+        }
+        outMessage = new Message(MessageType.GET_PARTY_ELEM_ID, party, i);
+        con.writeObject(outMessage);
+        
+        inMessage = (Message) con.readObject();
+        MessageType type = inMessage.getType();
+        if(type != MessageType.RESPONSE_INTEGER){
+            System.out.println("Party: Tipo inválido!");
+            System.out.println("Message:"+ inMessage.toString());
+            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
+            System.exit(1);
+        }
+        int out = inMessage.getInteger();
+        con.close();
+        return out;
     }
 
+    /**
+     * ServerCom, set master state
+     * @param masterState master state
+     */
     private void setMasterState(MasterState masterState) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -350,6 +412,11 @@ public class AssaultParty implements IMaster, IThieves{
         con.close();
     }
 
+    /**
+     * ServerCom, get party element position
+     * @param id thief id
+     * @return position
+     */
     private int getAssaultPartyElemPosition(int id) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -375,6 +442,11 @@ public class AssaultParty implements IMaster, IThieves{
         return out;
     }
 
+    /**
+     * ServerCom, set thief state
+     * @param thievesState thief state
+     * @param id thief id
+     */
     private void setThiefState(ThievesState thievesState, int id) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -398,6 +470,11 @@ public class AssaultParty implements IMaster, IThieves{
         con.close();
     }
 
+    /**
+     * ServerCom, get thief max displacement
+     * @param id thief id
+     * @return max displacement
+     */
     private int getThiefMaxDisplacement(int id) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -423,10 +500,14 @@ public class AssaultParty implements IMaster, IThieves{
         return out;
     }
 
+    /**
+     * ServerCom, update party element position
+     * @param id thief id
+     * @param nextPosition next position 
+     */
     private void updateAssautPartyElemPosition(int id, int nextPosition) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
-        
         while(!con.open()){
             try{
                 sleep((long) (10));

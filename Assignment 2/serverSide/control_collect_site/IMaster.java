@@ -1,10 +1,7 @@
-/*
- * Distributed Systems
- */
 package serverSide.control_collect_site;
 
 /**
- * Master interface of Conctrol Collection Site instance.
+ * Master interface of Control Collection Site instance.
  * @author João Brito, 68137
  */
 public interface IMaster {

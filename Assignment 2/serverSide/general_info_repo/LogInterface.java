@@ -8,7 +8,7 @@ import communication.proxy.ServerInterface;
 import java.net.SocketException;
 
 /**
- *
+ * Log Interface Stub.
  * @author João Brito
  */
 public class LogInterface implements ServerInterface{
@@ -122,6 +122,14 @@ public class LogInterface implements ServerInterface{
             case UPDATE_MUSEUM:
                 log.updateMuseum(inMessage.getIdRoom(), inMessage.getPaintings());
                 outMessage = new Message(MessageType.ACK);
+                break;
+            case GET_DISTANCE:
+                value = log.getRoomDistance(inMessage.getIdRoom());
+                outMessage = new Message(MessageType.RESPONSE_INTEGER, value);
+                break;
+            case GET_PARTY_ELEM_ID:
+                value = log.getAssaultPartyElemId(inMessage.getIdParty(), inMessage.getIdThief());
+                outMessage = new Message(MessageType.RESPONSE_INTEGER, value);
                 break;
             default:
                 System.out.println("Mensagem inválida recebida: " + inMessage);

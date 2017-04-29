@@ -1,6 +1,3 @@
-/*
- *  Distributed Systems
- */
 package serverSide.control_collect_site;
 
 import clientSide.Master.MasterState;
@@ -138,7 +135,10 @@ public class ControlCollectionSite implements IMaster, IThieves {
     }
     
     /* CONTROL & COLLECTION SITE AS A CLIENT */
-
+    
+    /**
+     *  ServerCom, new heist. 
+     */
     private void newHeist() {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -162,6 +162,10 @@ public class ControlCollectionSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, set master state
+     * @param masterState master state
+     */
     private void setMasterState(MasterState masterState) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -185,6 +189,9 @@ public class ControlCollectionSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, init party element identification
+     */
     private void initAssaultPartyElemId() {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -208,6 +215,11 @@ public class ControlCollectionSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, set party action
+     * @param assault_party1_rid party1 room number
+     * @param assault_party2_rid party2 room number
+     */
     private void setAssaultPartyAction(int assault_party1_rid, int assault_party2_rid) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -231,6 +243,11 @@ public class ControlCollectionSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, update thief situation
+     * @param id thief id
+     * @param c thief situation
+     */
     private void updateThiefSituation(int id, char c) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -254,6 +271,11 @@ public class ControlCollectionSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, update party element canvas.
+     * @param id thief id
+     * @param i thief canvas
+     */
     private void updateAssaultPartyElemCv(int id, int i) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -277,6 +299,11 @@ public class ControlCollectionSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, update party element id
+     * @param party party id
+     * @param id thief id
+     */
     private void updateAssaultPartyElemId(int party, int id) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -300,6 +327,10 @@ public class ControlCollectionSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, set party 1 room 
+     * @param i room number
+     */
     private void setAssaultParty1RoomId(int i) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -323,6 +354,10 @@ public class ControlCollectionSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, set party 2 room.
+     * @param i room number
+     */
     private void setAssaultParty2RoomId(int i) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;

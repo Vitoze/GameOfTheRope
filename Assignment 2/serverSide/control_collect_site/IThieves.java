@@ -1,10 +1,7 @@
-/*
- * Distributed Systems
- */
 package serverSide.control_collect_site;
 
 /**
- * Thieves interface of Conctrol Collection Site instance.
+ * Thieves interface of Control Collection Site instance.
  * @author João Brito, 68137
  */
 public interface IThieves {

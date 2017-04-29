@@ -28,8 +28,9 @@ public class Thieves extends Thread {
         this.md = md;
         this.setName("Thief"+this.id);
         state = ThievesState.OUTSIDE;
-        
         initThieves(this.state,this.id, this.s, this.md);
+        
+        System.out.println("New Thief");
     }
     
     /**
@@ -43,6 +44,7 @@ public class Thieves extends Thread {
         int party;
         while(!heistOver){
             // OUTSIDE
+        System.out.println("OUTS");
             if(amINeeded(this.id)==0){
                 party = prepareExcursion(this.id);
                 // CRAWLING_INWARDS
@@ -60,6 +62,7 @@ public class Thieves extends Thread {
                     }
                 }
                 // AT_A_ROOM
+        System.out.println("ATAR");
                 canvas = rollACanvas(this.id,party_room);
                 // CRAWLING_OUTWARDS
                 if(party==1){
@@ -82,6 +85,13 @@ public class Thieves extends Thread {
         }
     }
 
+    /**
+     * Create a new thief in log.
+     * @param state thief state
+     * @param id thief id
+     * @param s thief situation
+     * @param md thief max displacement
+     */
     private void initThieves(ThievesState state, int id, char s, int md) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -106,8 +116,14 @@ public class Thieves extends Thread {
             System.exit(1);
         }
         con.close();
+        System.out.println("InitThievesSucess");
     }
 
+    /**
+     * Thief wait for to be needed
+     * @param id thief id
+     * @return what to do next
+     */
     private int amINeeded(int id) {
         ClientCom con = new ClientCom(SimulConfig.concentrationServerName, SimulConfig.concentrationServerPort);
         Message inMessage, outMessage;
@@ -135,6 +151,11 @@ public class Thieves extends Thread {
         return out;
     }
 
+    /**
+     * Thief get ready to go.
+     * @param id thief id
+     * @return 
+     */
     private int prepareExcursion(int id) {
         ClientCom con = new ClientCom(SimulConfig.concentrationServerName, SimulConfig.concentrationServerPort);
         Message inMessage, outMessage;
@@ -163,6 +184,11 @@ public class Thieves extends Thread {
         return out;
     }
 
+    /**
+     * Waits for Master's sendAssaultParty
+     * @param id thief id
+     * @return room id
+     */
     private int waitForSendAssaultParty(int id) {
         ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
         Message inMessage, outMessage;
@@ -191,6 +217,11 @@ public class Thieves extends Thread {
         return out;
     }
 
+    /**
+     * Checks if it is at Museum already
+     * @param id thief id
+     * @return true or false
+     */
     private boolean atMuseum(int id) {
         ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
         Message inMessage, outMessage;
@@ -223,6 +254,10 @@ public class Thieves extends Thread {
         return value;
     }
 
+    /**
+     * Waits to be the next one to move.
+     * @param id thief id
+     */
     private void waitForMember(int id) {
         ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
         Message inMessage, outMessage;
@@ -249,6 +284,10 @@ public class Thieves extends Thread {
         con.close();
     }
 
+    /**
+     * Crawls towards the museum
+     * @param id thief id
+     */
     private void crawlIn(int id) {
         ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
         Message inMessage, outMessage;
@@ -275,6 +314,10 @@ public class Thieves extends Thread {
         con.close();
     }
 
+    /**
+     * Crawls to the concentration site
+     * @param id thief id
+     */
     private void crawlOut(int id) {
         ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
         Message inMessage, outMessage;
@@ -301,6 +344,13 @@ public class Thieves extends Thread {
         con.close();
     }
 
+    /**
+     * Thief hand a canvas to Master
+     * @param id thief id
+     * @param party party id
+     * @param party_room room id
+     * @param canvas has Canvas?
+     */
     private void handACanvas(int id, int party, int party_room, int canvas) {
         ClientCom con = new ClientCom(SimulConfig.controlServerName, SimulConfig.controlServerPort);
         Message inMessage, outMessage;
@@ -327,6 +377,12 @@ public class Thieves extends Thread {
         con.close();
     }
 
+    /**
+     * Get a canvas from the museum
+     * @param id thief id
+     * @param party_room room id
+     * @return has Canvas ? 
+     */
     private int rollACanvas(int id, int party_room) {
         ClientCom con = new ClientCom(SimulConfig.museumServerName, SimulConfig.museumServerPort);
         Message inMessage, outMessage;
@@ -355,6 +411,11 @@ public class Thieves extends Thread {
         return out;
     }
 
+    /**
+     * Verify if it is at concentration site.
+     * @param id thief id
+     * @return true or false
+     */
     private boolean atConcentration(int id) {
         ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
         Message inMessage, outMessage;
@@ -387,6 +448,10 @@ public class Thieves extends Thread {
         return value;
     }
 
+    /**
+     * Wait for all the thieves are ready to go back to concentration site.
+     * @param id thief id
+     */
     private void waitForReverseDirection(int id) {
         ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
         Message inMessage, outMessage;
@@ -413,6 +478,11 @@ public class Thieves extends Thread {
         con.close();
     }
 
+    /**
+     * Waits for Master's sendAssaultParty
+     * @param id thief id
+     * @return room id
+     */
     private int waitForSendAssaultParty2(int id) {
         ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
         Message inMessage, outMessage;
@@ -441,6 +511,11 @@ public class Thieves extends Thread {
         return out;
     }
 
+    /**
+     * Checks if it is at Museum already
+     * @param id thief id
+     * @return true or false
+     */
     private boolean atMuseum2(int id) {
         ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
         Message inMessage, outMessage;
@@ -473,6 +548,10 @@ public class Thieves extends Thread {
         return value;
     }
 
+    /**
+     * Waits to be the next one to move.
+     * @param id thief id
+     */
     private void waitForMember2(int id) {
         ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
         Message inMessage, outMessage;
@@ -499,6 +578,10 @@ public class Thieves extends Thread {
         con.close();
     }
 
+    /**
+     * Crawls towards the museum
+     * @param id thief id
+     */
     private void crawlIn2(int id) {
         ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
         Message inMessage, outMessage;
@@ -525,6 +608,10 @@ public class Thieves extends Thread {
         con.close();
     }
 
+    /**
+     * Wait for all the thieves are ready to go back to concentration site.
+     * @param id thief id
+     */
     private void waitForReverseDirection2(int id) {
         ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
         Message inMessage, outMessage;
@@ -551,6 +638,11 @@ public class Thieves extends Thread {
         con.close();
     }
 
+    /**
+     * Verify if it is at concentration site.
+     * @param id thief id
+     * @return true or false
+     */
     private boolean atConcentration2(int id) {
         ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
         Message inMessage, outMessage;
@@ -583,6 +675,10 @@ public class Thieves extends Thread {
         return value;
     }
 
+    /**
+     * Crawls to the concentration site
+     * @param id thief id
+     */
     private void crawlOut2(int id) {
         ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
         Message inMessage, outMessage;

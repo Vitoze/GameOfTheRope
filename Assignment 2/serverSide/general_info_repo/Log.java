@@ -1,15 +1,8 @@
-/*
- * Distributed systems
- */
 package serverSide.general_info_repo;
 
-import com.sun.javafx.binding.Logging;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import clientSide.Master.MasterState;
@@ -119,7 +112,7 @@ public class Log {
             
             pw.flush();
         }catch(FileNotFoundException ex){
-            Logger.getLogger(Logging.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Logger.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

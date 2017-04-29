@@ -1,6 +1,3 @@
-/*
- * Distributed Systems
- */
 package serverSide.general_info_repo;
 
 import java.util.HashMap;
@@ -278,6 +275,7 @@ public class Heist{
      * @return thief position.
      */
     public synchronized int getAssaultPartyElemPos(int id) {
+        //System.out.println(id + ", getPartyElemPos: " +assault_party_pos.size());
         return this.assault_party_pos.get(id);
     }
     

@@ -71,6 +71,14 @@ public class Message implements Serializable{
         this.type = type;
         
         switch(type){
+            case ACK:
+                break;
+            case TERMINATE:
+            	break;
+            case POSITIVE:
+                break;
+            case NEGATIVE:
+                break;
             case START_OPERATIONS:
                 break;
             case APPRAISE_SIT:
@@ -145,9 +153,10 @@ public class Message implements Serializable{
                 this.idRoom = value;
                 break;
             case GET_DISTANCE:
+                this.idRoom = value;
                 break;
             case GET_PARTY_ELEM_POS:
-                this.idParty = value;
+                this.idThief = value;
                 break;
             case GET_MAX_DISPLACEMENT:
                 this.idThief = value;
@@ -200,6 +209,12 @@ public class Message implements Serializable{
                 this.idThief = value2;
                 break;
             case GET_PARTY_ELEM_ID:
+                this.idParty = value1;
+                this.idThief = value2;
+                break;
+            case UPDATE_PARTY_ELEM_POS:
+                this.idThief = value1;
+                this.pos = value2;
                 break;
             default:
                 System.err.println(type + ", wrong message type!");
@@ -405,68 +420,128 @@ public class Message implements Serializable{
         return thiefState;
     }
     
+    /**
+     * Get party identification.
+     * @return party id
+     */
     public int getIdParty(){
         return idParty;
     }
     
+    /**
+     * Get museum room number.
+     * @return room number
+     */
     public int getIdRoom(){
         return idRoom;
     }
     
+    /**
+     * Get canvas.
+     * @return canvas
+     */
     public int getCv(){
         return cv;
     }
     
+    /**
+     * Get position.
+     * @return position
+     */
     public int getPos(){
         return pos;
     }
     
+    /**
+     * Get last assault variable.
+     * @return last assault
+     */
     public int getLastAssault(){
         return lastAssault;
     }
     
+    /**
+     * Get thief situation.
+     * @return thief situation
+     */
     public char getThiefSituation(){
         return situation;
     }
     
+    /**
+     * Get thieves maximum displacement.
+     * @return max displacement
+     */
     public int getMaxDisplacement(){
         return maxDisplacement;
     }
     
+    /**
+     * Get party position.
+     * @return party element position
+     */
     public int getPartyPos(){
         return partyPos;
     }
     
+    /**
+     * Get thief situation
+     * @return situation
+     */
     public char getSituation(){
         return situation;
     }
     
+    /**
+     * Get action 1.
+     * @return action
+     */
     public int getAction1(){
         return action1;
     }
     
+    /**
+     * Get action 2.
+     * @return action
+     */
     public int getAction2(){
         return action2;
     }
     
+    /**
+     * Get distance.
+     * @return distance
+     */
     public int getDistance(){
         return distance;
     }
     
+    /**
+     * Get paintings.
+     * @return paintings
+     */
     public int getPaintings(){
         return paintings;
     }
     
+    /**
+     * Get decision matrix.
+     * @return decision
+     */
     public int[] getDecision(){
         return decision;
     }
     
+    /**
+     * Get integer value.
+     * @return integer
+     */
     public int getInteger(){
         return value;
     }
     
     /**
-     * Convert the message type to a readable/wrtitable format.
+     * Convert the message type to a readable/writable format.
      * @return message type as a string
      */
     @Override

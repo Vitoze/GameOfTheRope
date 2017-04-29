@@ -1,6 +1,3 @@
-/*
- * Distributed Systems
- */
 package serverSide.museum;
 
 import communication.ClientCom;
@@ -48,7 +45,15 @@ public class Museum implements IThieves{
             return 0;
         }
     }
+    
+    /* Museum as a client */
 
+    /**
+     * ServerCom, init museum
+     * @param i room number
+     * @param dt room distance
+     * @param np room paintings
+     */
     private void initMuseum(int i, int dt, int np) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -72,6 +77,11 @@ public class Museum implements IThieves{
         con.close();
     }
 
+    /**
+     * ServerCom, get museum paintings.
+     * @param rid room number
+     * @return paintings
+     */
     private int getMuseumPaintings(int rid) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -97,6 +107,11 @@ public class Museum implements IThieves{
         return out;
     }
 
+    /**
+     * ServerCom, update museum.
+     * @param rid room number
+     * @param i paintings
+     */
     private void updateMuseum(int rid, int i) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -120,6 +135,11 @@ public class Museum implements IThieves{
         con.close();
     }
 
+    /**
+     * ServerCom, update party element canvas.
+     * @param id thief id
+     * @param i thief canvas
+     */
     private void updateAssaultPartyElemCv(int id, int i) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;

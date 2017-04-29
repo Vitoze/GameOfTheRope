@@ -8,7 +8,7 @@ import communication.proxy.ServerInterface;
 import java.net.SocketException;
 
 /**
- *
+ * Assault Party Communication Interface Stub
  * @author João Brito
  */
 public class AssaultPartyInterface implements ServerInterface{

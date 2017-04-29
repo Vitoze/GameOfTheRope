@@ -54,7 +54,6 @@ public class ConcentrationSite implements IMaster, IThieves {
         setMasterState(MasterState.ASSEMBLING_A_GROUP);
         callAssault = true;
         orders = 0;
-        System.out.println("Here");
         notifyAll();
         
     }
@@ -98,7 +97,6 @@ public class ConcentrationSite implements IMaster, IThieves {
      */
     @Override
     public synchronized void waitForPrepareExcursion() {
-        System.out.println("Here Master");
         while(!this.thievesReady){
             try {
                 wait();
@@ -161,6 +159,10 @@ public class ConcentrationSite implements IMaster, IThieves {
     
     /* CONCENTRATION SITE AS A CLIENT */
 
+    /**
+     * ServerCom, set master state.
+     * @param masterState master state
+     */
     private void setMasterState(MasterState masterState) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -184,6 +186,12 @@ public class ConcentrationSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, set party member
+     * @param party party id
+     * @param counter1 element number
+     * @param id thief id
+     */
     private void setAssaultPartyMember(int party, int counter1, int id) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -207,6 +215,11 @@ public class ConcentrationSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, update thief situation
+     * @param id thief id
+     * @param c thief situation
+     */
     private void updateThiefSituation(int id, char c) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -230,6 +243,11 @@ public class ConcentrationSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, update thief state.
+     * @param thievesState thief state
+     * @param id thief id
+     */
     private void setThiefState(ThievesState thievesState, int id) {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
@@ -253,6 +271,9 @@ public class ConcentrationSite implements IMaster, IThieves {
         con.close();
     }
 
+    /**
+     * ServerCom, print heist results
+     */
     private void printResults() {
         ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
         Message inMessage, outMessage;
