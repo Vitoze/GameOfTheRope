@@ -1,7 +1,7 @@
 package serverSide.assault_party;
 
 /**
- * Master interface of AssaultParty#2 instance.
+ * Master interface of AssaultParty instance.
  * @author João Brito, 68137
  */
 public interface IMaster {

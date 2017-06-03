@@ -11,44 +11,98 @@ import java.io.Serializable;
  */
 public class Message implements Serializable{
     
+    /**
+     * Integer error - minimum value integer.
+     */
     public static final int ERROR_INT = Integer.MIN_VALUE;
     
+    /**
+     * Char error.
+     */
     public static final char ERROR_CHAR = 0xFFFE;
     
+    /**
+     * Identification serial version.
+     */
     private static final long serialVersionUID = 1001L;
     
+    /**
+     * Message type.
+     */
     private MessageType type;
     
+    /**
+     * Thief identification.
+     */
     private int idThief;
     
+    /**
+     * Master state.
+     */
     private MasterState masterState;
     
+    /**
+     * Thief state.
+     */
     private ThievesState thiefState;
-        
+      
+    /**
+     * Party identification.
+     */
     private int idParty;
     
+    /**
+     * Room identification.
+     */
     private int idRoom;
     
+    /**
+     * Distance.
+     */
     private int distance;
     
+    /**
+     * Number of paintings.
+     */
     private int paintings;
     
+    /**
+     * Canvas.
+     */
     private int cv;
     
+    /**
+     * Position.
+     */
     private int pos;
     
+    /**
+     * Thief situation.
+     */
     private char situation;
     
+    /**
+     * Maximum Displacement.
+     */
     private int maxDisplacement;
     
+    /**
+     * Last Assault.
+     */
     private int lastAssault;
     
     private int action1;
     
     private int action2;
     
+    /**
+     * Array of decisions.
+     */
     private int[] decision;
     
+    /**
+     * Position party.
+     */
     private int partyPos;
     
     private int value;
@@ -343,7 +397,7 @@ public class Message implements Serializable{
     }
 
     /**
-     * Constructor for a message class 8
+     * Constructor for a message class 8.
      * @param messageType is the type of message
      * @param state thief state
      * @param value1 thief id

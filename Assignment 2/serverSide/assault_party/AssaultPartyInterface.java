@@ -12,7 +12,7 @@ import java.net.SocketException;
  * @author João Brito
  */
 public class AssaultPartyInterface implements ServerInterface{
-    
+
     private final AssaultParty party;
     private boolean serviceEnded;
     

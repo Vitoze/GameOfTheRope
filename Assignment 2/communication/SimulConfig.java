@@ -18,13 +18,13 @@ public class SimulConfig {
     public final static int logServerPort = 22200;
     
     /**
-     * Variable that holds the address for the control & collection site server.
+     * Variable that holds the address for the control collection site server.
      */
     public final static String controlServerName = "127.0.0.1";
     //public final static String controlServerName = "l040101-ws09.ua.pt";
     
     /**
-     * Variable that holds the port number for the control & collection site server.
+     * Variable that holds the port number for the control collection site server.
      */
     public final static int controlServerPort = 22201;
     

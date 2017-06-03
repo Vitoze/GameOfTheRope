@@ -11,10 +11,25 @@ import java.util.Arrays;
  * @author João Brito, 68137
  */
 public class Thieves extends Thread {
-    
+    /**
+     * Thief index.
+     * @serialField id
+     */
     private final int id;
+    /**
+     * Thief state.
+     * @serialField state
+     */
     private final ThievesState state;
+    /**
+     * Thief situation.
+     * @serialField s
+     */
     private final char s;
+    /**
+     * Thief maximum displacement.
+     * @serialField md
+     */
     private final int md;
     
     /**

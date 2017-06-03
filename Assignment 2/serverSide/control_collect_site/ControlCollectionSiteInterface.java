@@ -8,12 +8,19 @@ import communication.proxy.ServerInterface;
 import java.net.SocketException;
 
 /**
- * Control & Collection site interface.
+ * Control Collection site interface.
  * @author João Brito
  */
 public class ControlCollectionSiteInterface implements ServerInterface {
     
+    /**
+     * Instance of Control collection site.
+     * 
+     */
     private final ControlCollectionSite control;
+    /**
+     * The Boolean variable represents whether the service is finished.
+     */
     private boolean serviceEnded;
     
     public ControlCollectionSiteInterface(ControlCollectionSite control){

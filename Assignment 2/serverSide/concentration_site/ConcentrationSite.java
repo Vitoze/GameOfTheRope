@@ -17,17 +17,37 @@ import java.util.logging.Logger;
  * @author João Brito, 68137
  */
 public class ConcentrationSite implements IMaster, IThieves {
+    
+    /**
+     * The variable boolean represent if assault is called.
+     */
     private boolean callAssault = false;
+    /**
+     * The variable boolean represent if thieves is ready.
+     */
     private boolean thievesReady = false;
+    /**
+     * The variable boolean represent if it is last assault.
+     */
     private boolean lastAssault = false;
+    /**
+     * The variable represents whether it is the end of theft.
+     */
     private boolean endHeist = false;
+    /**
+     * Represents order.
+     */
     private int orders = -1;
+    
     private int counter1 = 0;
     private int counter2 = 0;
+    /**
+     * List of thieves.
+     */
     private final LinkedList<Integer> thieves;
 
     /**
-     * Init the concentration site.
+     * Initiate the concentration site.
      */
     public ConcentrationSite() {
         thieves = new LinkedList<>();

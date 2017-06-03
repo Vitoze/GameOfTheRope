@@ -13,7 +13,13 @@ import java.net.SocketException;
  */
 public class LogInterface implements ServerInterface{
     
+    /**
+     * Instance of log. 
+     */
     private final Log log;
+    /**
+     * The boolean variable represents if the service terminates.
+     */
     public boolean serviceEnded;
     
     public LogInterface(Log log){
