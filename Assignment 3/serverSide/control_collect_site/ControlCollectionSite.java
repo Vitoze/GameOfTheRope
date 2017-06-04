@@ -1,56 +1,67 @@
 package serverSide.control_collect_site;
 
-import interfaces.IMasterControl;
-import interfaces.IThievesControl;
+import interfaces.ControlCollectionSiteInterface;
+import interfaces.LogInterface;
 import structures.enumerates.MasterState;
-import communication.ClientCom;
-import communication.SimulConfig;
 import java.util.HashMap;
 import structures.constants.SimulParam;
-import communication.message.Message;
-import communication.message.MessageType;
-import static java.lang.Thread.sleep;
-import java.util.Arrays;
+import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import structures.enumerates.ThievesState;
+import structures.vectorClock.VectorTimestamp;
 
 /**
  *  Control and Collection Site instance.
  *  @author João Brito, 68137
  */
-public class ControlCollectionSite implements IMasterControl, IThievesControl {
+public class ControlCollectionSite implements ControlCollectionSiteInterface {
     private boolean canvasCollected = false;
     private final HashMap<Integer, Boolean> museum;
     private int nElemToWait = 0;
     private int elemParty1 = 3;
     private int elemParty2 = 3;
+    private VectorTimestamp clocks;
+    private final LogInterface log;
     
     /**
      * Init the Control Site instance.
+     * @param log
      */
-    public ControlCollectionSite(){
+    public ControlCollectionSite(LogInterface log){
         museum = new HashMap<>();
+        this.log = log;
+        this.clocks = new VectorTimestamp(7, 0);
     }
-    
-    /**
-     * In Master life cycle, transition between "Planning the heist" and "Deciding what to do",
-     * initiates a heist. Master method.
-     */
+
     @Override
-    public void startOperations() {
+    public synchronized VectorTimestamp startOperations(VectorTimestamp vt) throws RemoteException {
+        clocks.update(vt);
         for(int rid=1; rid<=SimulParam.N_ROOMS; rid++){
             museum.put(rid, true);
         }
-        newHeist();
-        setMasterState(MasterState.DECIDING_WHAT_TO_DO);
+        
+        newHeist(clocks.clone());
+        setMasterState(MasterState.DECIDING_WHAT_TO_DO, clocks.clone());
+        return clocks.clone();
     }
-    
-    /**
-     * The Master decides what to do next
-     * @return 1 to prepare new assault or 2 to end heist. Master method.
-     */
+
     @Override
-    public synchronized int[] appraiseSit() {
+    public synchronized VectorTimestamp takeARest(VectorTimestamp vt) throws RemoteException {
+        clocks.update(vt);
+        while(!canvasCollected){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ControlCollectionSite.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        setMasterState(MasterState.DECIDING_WHAT_TO_DO, clocks.clone());
+        return clocks.clone();
+    }
+
+    @Override
+    public synchronized int[] appraiseSit() throws RemoteException {
         nElemToWait = 6;
         elemParty1 = 3;
         elemParty2 = 3;
@@ -88,30 +99,10 @@ public class ControlCollectionSite implements IMasterControl, IThievesControl {
         decision[1] = 1;
         return decision;
     }
-    
-    /**
-     * The master will wait for the assault party arrival. Master method.
-     */
+
     @Override
-    public synchronized void takeARest() {
-        while(!canvasCollected){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ControlCollectionSite.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        setMasterState(MasterState.DECIDING_WHAT_TO_DO);
-    }
-    
-    /**
-     * The thief will hand a canvas. Thieves method.
-     * @param id thief id.
-     * @param rid room number.
-     * @param cv has canvas? 0 or 1.
-     */
-    @Override
-    public synchronized void handACanvas(int id, int party, int rid, int cv) {
+    public synchronized VectorTimestamp handACanvas(int id, int party, int rid, int cv, VectorTimestamp vt) throws RemoteException {
+        clocks.update(vt);
         if(cv==0){
             museum.replace(rid, false);
         }
@@ -121,7 +112,7 @@ public class ControlCollectionSite implements IMasterControl, IThievesControl {
             notify();
         }
         updateThiefSituation(id, 'W');
-        updateAssaultPartyElemCv(id, 0);
+        updateAssaultPartyElemCv(id, 0, clocks.clone());
         updateAssaultPartyElemId(party, id);
         if(party==1){
             elemParty1--;
@@ -134,253 +125,123 @@ public class ControlCollectionSite implements IMasterControl, IThievesControl {
                 setAssaultParty2RoomId(0);
             }
         }
+        return clocks.clone();
+    }
+
+    @Override
+    public void newHeist(VectorTimestamp vt) throws RemoteException {
+        log.newHeist(vt);
+    }
+
+    @Override
+    public void setMasterState(MasterState state, VectorTimestamp vt) throws RemoteException {
+        log.setMasterState(state,vt);
+    }
+
+    @Override
+    public void initAssaultPartyElemId() {
+        log.initAssaultPartyElemId();
+    }
+
+    @Override
+    public void setAssaultPartyAction(int rid1, int rid2) {
+        log.setAssaultPartyAction(rid1, rid2);
+    }
+
+    @Override
+    public void updateThiefSituation(int id, char s) {
+        log.updateThiefSituation(id, s);
+    }
+
+    @Override
+    public void updateAssaultPartyElemCv(int id, int cv, VectorTimestamp vt) throws RemoteException {
+        log.updateAssaultPartyElemCv(id, cv, vt);
+    }
+
+    @Override
+    public void setAssaultParty1RoomId(int rid) {
+        log.setAssaultParty1RoomId(rid);
+    }
+
+    @Override
+    public void setAssaultParty2RoomId(int rid) {
+        log.setAssaultParty2RoomId(rid);
+    }
+
+    @Override
+    public void updateAssaultPartyElemId(int party, int id) {
+        log.updateAssaultPartyElemId(party, id);
+    }
+
+    @Override
+    public void initThieves(ThievesState state, int id, char s, int md) throws RemoteException {
+        log.initThieves(state, id, s, md);
+    }
+
+    @Override
+    public void printResults() {
+        log.printResults();
+    }
+
+    @Override
+    public void setAssaultPartyMember(int party, int i, int id) {
+        log.setAssaultPartyMember(party, i, id);
+    }
+
+    @Override
+    public void setThiefState(ThievesState state, int id, VectorTimestamp vt) throws RemoteException {
+        log.setThiefState(state, id, vt);
+    }
+
+    @Override
+    public int getAssaultParty1RoomId() {
+        return log.getAssaultParty1RoomId();
+    }
+
+    @Override
+    public int getAssaultParty2RoomId() {
+        return log.getAssaultParty2RoomId();
+    }
+
+    @Override
+    public int getRoomDistance(int roomId) {
+        return log.getRoomDistance(roomId);
+    }
+
+    @Override
+    public int getAssaultPartyElemId(int party, int i) {
+        return log.getAssaultPartyElemId(party, i);
+    }
+
+    @Override
+    public int getAssaultPartyElemPosition(int id) {
+        return log.getAssaultPartyElemPosition(id);
+    }
+
+    @Override
+    public int getThiefMaxDisplacement(int id) {
+        return log.getThiefMaxDisplacement(id);
+    }
+
+    @Override
+    public void updateAssautPartyElemPosition(int id, int pos, VectorTimestamp vt) throws RemoteException {
+        log.updateAssautPartyElemPosition(id, pos, vt);
+    }
+
+    @Override
+    public void initMuseum(int id, int dt, int np) {
+        log.initMuseum(id, dt, np);
+    }
+
+    @Override
+    public int getMuseumPaintings(int rid) {
+        return log.getMuseumPaintings(rid);
+    }
+
+    @Override
+    public void updateMuseum(int rid, int np) {
+        log.updateMuseum(rid, np);
     }
     
-    /* CONTROL & COLLECTION SITE AS A CLIENT */
-    
-    /**
-     *  ServerCom, new heist. 
-     */
-    private void newHeist() {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.NEW_HEIST);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, set master state
-     * @param masterState master state
-     */
-    private void setMasterState(MasterState masterState) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.SET_MASTER_STATE, masterState);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, init party element identification
-     */
-    private void initAssaultPartyElemId() {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.INIT_PARTY_ELEM_ID);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, set party action
-     * @param assault_party1_rid party1 room number
-     * @param assault_party2_rid party2 room number
-     */
-    private void setAssaultPartyAction(int assault_party1_rid, int assault_party2_rid) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.SET_PARTY_ACTION, assault_party1_rid, assault_party2_rid);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, update thief situation
-     * @param id thief id
-     * @param c thief situation
-     */
-    private void updateThiefSituation(int id, char c) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.UPDATE_THIEF_SITUATION, id, c);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, update party element canvas.
-     * @param id thief id
-     * @param i thief canvas
-     */
-    private void updateAssaultPartyElemCv(int id, int i) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.UPDATE_PARTY_ELEM_CV, id, i);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, update party element id
-     * @param party party id
-     * @param id thief id
-     */
-    private void updateAssaultPartyElemId(int party, int id) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.UPDATE_PARTY_ELEM_ID, party, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, set party 1 room 
-     * @param i room number
-     */
-    private void setAssaultParty1RoomId(int i) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.SET_PARTY1_ROOM_ID, i);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, set party 2 room.
-     * @param i room number
-     */
-    private void setAssaultParty2RoomId(int i) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.SET_PARTY2_ROOM_ID, i);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Control: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-       
+         
 }

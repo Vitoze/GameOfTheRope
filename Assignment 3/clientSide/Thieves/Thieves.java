@@ -1,11 +1,14 @@
 package clientSide.Thieves;
 
+import interfaces.AssaultPartyInterface;
+import interfaces.ConcentrationSiteInterface;
+import interfaces.ControlCollectionSiteInterface;
+import interfaces.LogInterface;
+import interfaces.MuseumInterface;
+import java.rmi.RemoteException;
+import structures.constants.SimulParam;
 import structures.enumerates.ThievesState;
-import communication.ClientCom;
-import communication.SimulConfig;
-import communication.message.Message;
-import communication.message.MessageType;
-import java.util.Arrays;
+import structures.vectorClock.VectorTimestamp;
 
 /**
  * Thieves instance.
@@ -18,18 +21,47 @@ public class Thieves extends Thread {
     private final char s;
     private final int md;
     
+    private final ControlCollectionSiteInterface control;
+    private final ConcentrationSiteInterface concentration;
+    private final AssaultPartyInterface party1;
+    private final AssaultPartyInterface party2;
+    private final LogInterface log;
+    private final MuseumInterface museum;
+    
+    private final VectorTimestamp myClock;
+    private VectorTimestamp receivedClock;
+    
     /**
      * It will be passed to the thief the methods that it has access.
      * @param id Thief identification.
      * @param md Thief maximum displacement.
+     * @param control
+     * @param concentration
+     * @param party1
+     * @param party2
+     * @param museum
+     * @param log
      */
-    public Thieves(int id, int md){
+    public Thieves(int id, int md, ControlCollectionSiteInterface control, ConcentrationSiteInterface concentration, AssaultPartyInterface party1, AssaultPartyInterface party2, MuseumInterface museum, LogInterface log){
         this.id = id;
         this.s = 'W';
         this.md = md;
         this.setName("Thief"+this.id);
         state = ThievesState.OUTSIDE;
-        initThieves(this.state,this.id, this.s, this.md);
+        
+        this.control = control;
+        this.concentration = concentration;
+        this.party1 = party1;
+        this.party2 = party2;
+        this.museum = museum;
+        this.log = log;
+        myClock = new VectorTimestamp(SimulParam.N_THIEVES, id-1);
+        
+        try{
+            initThieves(this.state,this.id, this.s, this.md);
+        } catch(RemoteException ex){
+            ex.printStackTrace();
+        }
         
         System.out.println("New Thief");
     }
@@ -43,47 +75,73 @@ public class Thieves extends Thread {
         int canvas;
         int party_room;
         int party;
-        while(!heistOver){
-            // OUTSIDE
-        System.out.println("OUTS");
-            if(amINeeded(this.id)==0){
-                party = prepareExcursion(this.id);
-                // CRAWLING_INWARDS
-                if(party==1){
-                    party_room=waitForSendAssaultParty(this.id);
-                    while(!atMuseum(this.id)){
-                        waitForMember(this.id);
-                        crawlIn(this.id);
+        try{
+            while(!heistOver){
+                // OUTSIDE
+            System.out.println("OUTS");
+                if(amINeeded(this.id)==0){
+                    party = prepareExcursion(this.id);
+                    // CRAWLING_INWARDS
+                    if(party==1){
+                        party_room=waitForSendAssaultParty(this.id);
+                        while(!atMuseum(this.id)){
+                            myClock.increment();
+                            receivedClock = waitForMember(this.id, myClock.clone());
+                            myClock.update(receivedClock);
+                            myClock.increment();
+                            receivedClock = crawlIn(this.id, myClock.clone());
+                            myClock.update(receivedClock);
+                        }
+                    }else{
+                        party_room=waitForSendAssaultParty2(this.id);
+                        while(!atMuseum2(this.id)){
+                            myClock.increment();
+                            receivedClock = waitForMember2(this.id, myClock.clone());
+                            myClock.update(receivedClock);
+                            myClock.increment();
+                            receivedClock = crawlIn2(this.id, myClock.clone());
+                            myClock.update(receivedClock);
+                        }
                     }
+                    // AT_A_ROOM
+            System.out.println("ATAR");
+                    canvas = rollACanvas(this.id,party_room);
+                    // CRAWLING_OUTWARDS
+                    if(party==1){
+                        myClock.increment();
+                        receivedClock = waitForReverseDirection(this.id, myClock.clone());
+                        myClock.update(receivedClock);
+                        while(!atConcentration(this.id)){
+                            myClock.increment();
+                            receivedClock = waitForMember(this.id, myClock.clone());
+                            myClock.update(receivedClock);
+                            myClock.increment();
+                            receivedClock = crawlOut(this.id, myClock.clone());
+                            myClock.update(receivedClock);
+                        }
+                    }else{
+                        myClock.increment();
+                        receivedClock = waitForReverseDirection2(this.id, myClock.clone());
+                        myClock.update(receivedClock);
+                        while(!atConcentration2(this.id)){
+                            myClock.increment();
+                            receivedClock = waitForMember2(this.id, myClock.clone());
+                            myClock.update(receivedClock);
+                            myClock.increment();
+                            receivedClock = crawlOut2(this.id, myClock.clone());
+                            myClock.update(receivedClock);
+                        }
+                    }
+                    myClock.increment();
+                    receivedClock = handACanvas(this.id, party, party_room, canvas, myClock.clone());
+                    myClock.update(receivedClock);
                 }else{
-                    party_room=waitForSendAssaultParty2(this.id);
-                    while(!atMuseum2(this.id)){
-                        waitForMember2(this.id);
-                        crawlIn2(this.id);
-                    }
+                    heistOver = true;
                 }
-                // AT_A_ROOM
-        System.out.println("ATAR");
-                canvas = rollACanvas(this.id,party_room);
-                // CRAWLING_OUTWARDS
-                if(party==1){
-                    waitForReverseDirection(this.id);
-                    while(!atConcentration(this.id)){
-                        waitForMember(this.id);
-                        crawlOut(this.id);
-                    }
-                }else{
-                    waitForReverseDirection2(this.id);
-                    while(!atConcentration2(this.id)){
-                        waitForMember2(this.id);
-                        crawlOut2(this.id);
-                    }
-                }
-                handACanvas(this.id, party, party_room, canvas);
-            }else{
-                heistOver = true;
             }
-        }
+        }catch(RemoteException e){
+            e.printStackTrace();
+        } 
     }
 
     /**
@@ -93,31 +151,8 @@ public class Thieves extends Thread {
      * @param s thief situation
      * @param md thief max displacement
      */
-    private void initThieves(ThievesState state, int id, char s, int md) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.INIT_THIEF, state, id, s, md);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-        System.out.println("InitThievesSucess");
+    private void initThieves(ThievesState state, int id, char s, int md) throws RemoteException {
+        log.initThieves(state, id, s, md);
     }
 
     /**
@@ -125,31 +160,8 @@ public class Thieves extends Thread {
      * @param id thief id
      * @return what to do next
      */
-    private int amINeeded(int id) {
-        ClientCom con = new ClientCom(SimulConfig.concentrationServerName, SimulConfig.concentrationServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.AM_I_NEEDED, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if (type != MessageType.RESPONSE_INTEGER ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-            int out = inMessage.getInteger();
-        con.close();
-        return out;
+    private int amINeeded(int id) throws RemoteException {
+        return concentration.amINeeded(id);
     }
 
     /**
@@ -157,32 +169,8 @@ public class Thieves extends Thread {
      * @param id thief id
      * @return 
      */
-    private int prepareExcursion(int id) {
-        ClientCom con = new ClientCom(SimulConfig.concentrationServerName, SimulConfig.concentrationServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.PREPARE_EXCURSION, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.RESPONSE_INTEGER) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
+    private int prepareExcursion(int id) throws RemoteException {
+        return concentration.prepareExcursion(id);
     }
 
     /**
@@ -190,32 +178,8 @@ public class Thieves extends Thread {
      * @param id thief id
      * @return room id
      */
-    private int waitForSendAssaultParty(int id) {
-        ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.WAIT_FOR_SEND_ASSAULT_PARTY, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.RESPONSE_INTEGER) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
+    private int waitForSendAssaultParty(int id) throws RemoteException {
+        return party1.waitForSendAssaultParty(id);
     }
 
     /**
@@ -223,126 +187,32 @@ public class Thieves extends Thread {
      * @param id thief id
      * @return true or false
      */
-    private boolean atMuseum(int id) {
-        ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.AT_MUSEUM, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        boolean value = false;
-        if(type == MessageType.POSITIVE){
-            value = true;
-        }else if(type == MessageType.NEGATIVE){
-            value = false;
-        }
-        else{
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-        return value;
+    private boolean atMuseum(int id) throws RemoteException {
+        return party1.atMuseum(id);
     }
 
     /**
      * Waits to be the next one to move.
      * @param id thief id
      */
-    private void waitForMember(int id) {
-        ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.WAIT_FOR_MEMBER, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp waitForMember(int id, VectorTimestamp vt) throws RemoteException {
+        return party1.waitForMember(id, vt);
     }
 
     /**
      * Crawls towards the museum
      * @param id thief id
      */
-    private void crawlIn(int id) {
-        ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.CRAWL_IN, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp crawlIn(int id, VectorTimestamp vt) throws RemoteException {
+        return party1.crawlIn(id, vt);
     }
 
     /**
      * Crawls to the concentration site
      * @param id thief id
      */
-    private void crawlOut(int id) {
-        ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.CRAWL_OUT, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp crawlOut(int id, VectorTimestamp vt) throws RemoteException {
+        return party1.crawlOut(id, vt);
     }
 
     /**
@@ -352,30 +222,8 @@ public class Thieves extends Thread {
      * @param party_room room id
      * @param canvas has Canvas?
      */
-    private void handACanvas(int id, int party, int party_room, int canvas) {
-        ClientCom con = new ClientCom(SimulConfig.controlServerName, SimulConfig.controlServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.HAND_A_CANVAS, id, party, party_room, canvas);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp handACanvas(int id, int party, int party_room, int canvas, VectorTimestamp vt) throws RemoteException {
+        return control.handACanvas(id, party, id, id, vt);
     }
 
     /**
@@ -384,32 +232,8 @@ public class Thieves extends Thread {
      * @param party_room room id
      * @return has Canvas ? 
      */
-    private int rollACanvas(int id, int party_room) {
-        ClientCom con = new ClientCom(SimulConfig.museumServerName, SimulConfig.museumServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.ROLL_A_CANVAS, id, party_room);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.RESPONSE_INTEGER) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
+    private int rollACanvas(int id, int party_room) throws RemoteException {
+        return museum.rollACanvas(id, party_room);
     }
 
     /**
@@ -417,66 +241,16 @@ public class Thieves extends Thread {
      * @param id thief id
      * @return true or false
      */
-    private boolean atConcentration(int id) {
-        ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.AT_CONCENTRATION, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        boolean value = false;
-        if(type == MessageType.POSITIVE){
-            value = true;
-        }else if(type == MessageType.NEGATIVE){
-            value = false;
-        }
-        else{
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-        return value;
+    private boolean atConcentration(int id) throws RemoteException {
+        return party1.atConcentration(id);
     }
 
     /**
      * Wait for all the thieves are ready to go back to concentration site.
      * @param id thief id
      */
-    private void waitForReverseDirection(int id) {
-        ClientCom con = new ClientCom(SimulConfig.partyServerName, SimulConfig.partyServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.WAIT_FOR_REVERSE_DIRECTION, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp waitForReverseDirection(int id, VectorTimestamp vt) throws RemoteException {
+        return party1.waitForReverseDirection(id, vt);
     }
 
     /**
@@ -484,32 +258,8 @@ public class Thieves extends Thread {
      * @param id thief id
      * @return room id
      */
-    private int waitForSendAssaultParty2(int id) {
-        ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.WAIT_FOR_SEND_ASSAULT_PARTY, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.RESPONSE_INTEGER) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
+    private int waitForSendAssaultParty2(int id) throws RemoteException {
+        return party2.waitForSendAssaultParty(id);
     }
 
     /**
@@ -517,126 +267,32 @@ public class Thieves extends Thread {
      * @param id thief id
      * @return true or false
      */
-    private boolean atMuseum2(int id) {
-        ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.AT_MUSEUM, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        boolean value = false;
-        if(type == MessageType.POSITIVE){
-            value = true;
-        }else if(type == MessageType.NEGATIVE){
-            value = false;
-        }
-        else{
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-        return value;
+    private boolean atMuseum2(int id) throws RemoteException {
+        return party2.atMuseum(id);
     }
 
     /**
      * Waits to be the next one to move.
      * @param id thief id
      */
-    private void waitForMember2(int id) {
-        ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.WAIT_FOR_MEMBER, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp waitForMember2(int id, VectorTimestamp vt) throws RemoteException {
+        return party2.waitForMember(id, vt);
     }
 
     /**
      * Crawls towards the museum
      * @param id thief id
      */
-    private void crawlIn2(int id) {
-        ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.CRAWL_IN, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp crawlIn2(int id, VectorTimestamp vt) throws RemoteException {
+        return party2.crawlIn(id, vt);
     }
 
     /**
      * Wait for all the thieves are ready to go back to concentration site.
      * @param id thief id
      */
-    private void waitForReverseDirection2(int id) {
-        ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.WAIT_FOR_REVERSE_DIRECTION, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp waitForReverseDirection2(int id, VectorTimestamp vt) throws RemoteException {
+        return party2.waitForReverseDirection(id, vt);
     }
 
     /**
@@ -644,66 +300,16 @@ public class Thieves extends Thread {
      * @param id thief id
      * @return true or false
      */
-    private boolean atConcentration2(int id) {
-        ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.AT_CONCENTRATION, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        boolean value = false;
-        if(type == MessageType.POSITIVE){
-            value = true;
-        }else if(type == MessageType.NEGATIVE){
-            value = false;
-        }
-        else{
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-        return value;
+    private boolean atConcentration2(int id) throws RemoteException {
+        return party2.atConcentration(id);
     }
-
+    
     /**
      * Crawls to the concentration site
      * @param id thief id
      */
-    private void crawlOut2(int id) {
-        ClientCom con = new ClientCom(SimulConfig.party2ServerName, SimulConfig.party2ServerPort);
-        Message inMessage, outMessage;
-
-        while (!con.open())
-        {
-            try {
-                sleep((long) (10));
-            } catch (InterruptedException e) {
-            }
-        }
-        outMessage = new Message(MessageType.CRAWL_OUT, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        
-        MessageType type = inMessage.getType();
-        if (type != MessageType.ACK ) {
-            System.out.println("Thread " + getName() + ": Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    private VectorTimestamp crawlOut2(int id, VectorTimestamp vt) throws RemoteException {
+        return party2.crawlOut(id, vt);
     }
 
 }

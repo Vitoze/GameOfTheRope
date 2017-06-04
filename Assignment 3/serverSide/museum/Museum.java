@@ -1,24 +1,29 @@
 package serverSide.museum;
 
-import interfaces.IThievesMuseum;
-import communication.ClientCom;
-import communication.SimulConfig;
+import interfaces.LogInterface;
+import interfaces.MuseumInterface;
+import java.rmi.RemoteException;
 import structures.constants.SimulParam;
-import communication.message.Message;
-import communication.message.MessageType;
-import static java.lang.Thread.sleep;
-import java.util.Arrays;
 import java.util.Random;
+import structures.enumerates.MasterState;
+import structures.enumerates.ThievesState;
+import structures.vectorClock.VectorTimestamp;
 /**
  * Museum instance.
  * @author João Brito, 68137
  */
-public class Museum implements IThievesMuseum{
+public class Museum implements MuseumInterface{
+    
+    private VectorTimestamp clocks;
+    private final LogInterface log;
     
     /**
      * Init the Museum instance.
      */
-    public Museum(){
+    public Museum(LogInterface log){
+        this.log = log;
+        this.clocks = new VectorTimestamp(7, 0);
+        
         for(int i=1; i<=SimulParam.N_ROOMS; i++){
             Random rand = new Random();
             //random.nextInt(max + 1 - min) + min
@@ -36,10 +41,10 @@ public class Museum implements IThievesMuseum{
      * @return '0' if there isn't more canvas.
      */
     @Override
-    public synchronized int rollACanvas(int id, int rid) {
+    public synchronized int rollACanvas(int id, int rid) throws RemoteException {
         if(getMuseumPaintings(rid)>0){
             updateMuseum(rid, getMuseumPaintings(rid)-1);
-            updateAssaultPartyElemCv(id, 1);
+            updateAssaultPartyElemCv(id, 1, clocks.clone());
             //System.out.println("Here");
             return 1;
         }else{
@@ -47,121 +52,120 @@ public class Museum implements IThievesMuseum{
         }
     }
     
-    /* Museum as a client */
-
-    /**
-     * ServerCom, init museum
-     * @param i room number
-     * @param dt room distance
-     * @param np room paintings
-     */
-    private void initMuseum(int i, int dt, int np) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.INIT_MUSEUM, i, dt, np);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Museum: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    @Override
+    public void newHeist(VectorTimestamp vt) throws RemoteException {
+        log.newHeist(vt);
     }
 
-    /**
-     * ServerCom, get museum paintings.
-     * @param rid room number
-     * @return paintings
-     */
-    private int getMuseumPaintings(int rid) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.GET_MUSEUM_PAINTINGS, rid);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.RESPONSE_INTEGER){
-            System.out.println("Museum: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
+    @Override
+    public void setMasterState(MasterState state, VectorTimestamp vt) throws RemoteException {
+        log.setMasterState(state,vt);
     }
 
-    /**
-     * ServerCom, update museum.
-     * @param rid room number
-     * @param i paintings
-     */
-    private void updateMuseum(int rid, int i) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.UPDATE_MUSEUM, rid, i);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Museum: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    @Override
+    public void initAssaultPartyElemId() {
+        log.initAssaultPartyElemId();
     }
 
-    /**
-     * ServerCom, update party element canvas.
-     * @param id thief id
-     * @param i thief canvas
-     */
-    private void updateAssaultPartyElemCv(int id, int i) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.UPDATE_PARTY_ELEM_CV, id, i);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Museum: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
+    @Override
+    public void setAssaultPartyAction(int rid1, int rid2) {
+        log.setAssaultPartyAction(rid1, rid2);
     }
+
+    @Override
+    public void updateThiefSituation(int id, char s) {
+        log.updateThiefSituation(id, s);
+    }
+
+    @Override
+    public void updateAssaultPartyElemCv(int id, int cv, VectorTimestamp vt) throws RemoteException {
+        log.updateAssaultPartyElemCv(id, cv, vt);
+    }
+
+    @Override
+    public void setAssaultParty1RoomId(int rid) {
+        log.setAssaultParty1RoomId(rid);
+    }
+
+    @Override
+    public void setAssaultParty2RoomId(int rid) {
+        log.setAssaultParty2RoomId(rid);
+    }
+
+    @Override
+    public void updateAssaultPartyElemId(int party, int id) {
+        log.updateAssaultPartyElemId(party, id);
+    }
+
+    @Override
+    public void initThieves(ThievesState state, int id, char s, int md) throws RemoteException {
+        log.initThieves(state, id, s, md);
+    }
+
+    @Override
+    public void printResults() {
+        log.printResults();
+    }
+
+    @Override
+    public void setAssaultPartyMember(int party, int i, int id) {
+        log.setAssaultPartyMember(party, i, id);
+    }
+
+    @Override
+    public void setThiefState(ThievesState state, int id, VectorTimestamp vt) throws RemoteException {
+        log.setThiefState(state, id, vt);
+    }
+
+    @Override
+    public int getAssaultParty1RoomId() {
+        return log.getAssaultParty1RoomId();
+    }
+
+    @Override
+    public int getAssaultParty2RoomId() {
+        return log.getAssaultParty2RoomId();
+    }
+
+    @Override
+    public int getRoomDistance(int roomId) {
+        return log.getRoomDistance(roomId);
+    }
+
+    @Override
+    public int getAssaultPartyElemId(int party, int i) {
+        return log.getAssaultPartyElemId(party, i);
+    }
+
+    @Override
+    public int getAssaultPartyElemPosition(int id) {
+        return log.getAssaultPartyElemPosition(id);
+    }
+
+    @Override
+    public int getThiefMaxDisplacement(int id) {
+        return log.getThiefMaxDisplacement(id);
+    }
+
+    @Override
+    public void updateAssautPartyElemPosition(int id, int pos, VectorTimestamp vt) throws RemoteException {
+        log.updateAssautPartyElemPosition(id, pos, vt);
+    }
+
+    @Override
+    public void initMuseum(int id, int dt, int np) {
+        log.initMuseum(id, dt, np);
+    }
+
+    @Override
+    public int getMuseumPaintings(int rid) {
+        return log.getMuseumPaintings(rid);
+    }
+
+    @Override
+    public void updateMuseum(int rid, int np) {
+        log.updateMuseum(rid, np);
+    }
+    
 }
 

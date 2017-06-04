@@ -1,24 +1,20 @@
 package serverSide.assault_party;
 
-import interfaces.IThievesParty;
-import interfaces.IMasterParty;
+import interfaces.AssaultPartyInterface;
+import interfaces.LogInterface;
 import structures.enumerates.MasterState;
 import structures.enumerates.ThievesState;
-import communication.ClientCom;
-import communication.SimulConfig;
-import communication.message.Message;
-import communication.message.MessageType;
-import static java.lang.Thread.sleep;
-import java.util.Arrays;
+import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import structures.vectorClock.VectorTimestamp;
 
 /**
  * Assault party instance.
  * @author João Brito, 68137
  */
-public class AssaultParty implements IMasterParty, IThievesParty{
+public class AssaultParty implements AssaultPartyInterface{
     private boolean partyReady = false;
     private int party_number = 0;
     private int counterToCrawlBack = 0;
@@ -26,44 +22,21 @@ public class AssaultParty implements IMasterParty, IThievesParty{
     private int nElemParty = 0;
     private int roomDistance = 0;
     private final LinkedList<Integer> nextElem;
+    private VectorTimestamp clocks;
+    private final LogInterface log;
     
     /**
      * Init the assault party#1.
      */
-    public AssaultParty(){
+    public AssaultParty(LogInterface log){
         nextElem = new LinkedList<>();
+        this.log = log;
+        this.clocks = new VectorTimestamp(7, 0);
     }
-    
-    /**
-     * The thieves will wait for the Master to send the assault party. Thieves method.
-     * @param id thief id.
-     * @return room number to assault.
-     */
+
     @Override
-    public synchronized int waitForSendAssaultParty(int id) {
-        partyReady=false;
-        if(nElemParty==3){
-            nElemParty=0;
-            counterToCrawlBack = 0;
-            notifyAll();
-        }
-        nElemParty++;
-        notifyAll();
-        while(!partyReady){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        return room_id;
-    }
-    
-    /**
-     * The Master will send the assault party. Master method.
-     */
-    @Override
-    public synchronized void sendAssaultParty(int aid) {
+    public synchronized VectorTimestamp sendAssaultParty(int aid, VectorTimestamp vt) throws RemoteException {
+        clocks.update(vt);
         party_number = aid;
         partyReady = false;
         if(party_number == 1){
@@ -92,45 +65,14 @@ public class AssaultParty implements IMasterParty, IThievesParty{
             nextElem.add(getAssaultPartyElemId(2, 2));
             nextElem.add(getAssaultPartyElemId(2, 3));
         }
-        setMasterState(MasterState.WAITING_FOR_GROUP_ARRIVAL);
+        setMasterState(MasterState.WAITING_FOR_GROUP_ARRIVAL, clocks.clone());
         notifyAll();
-    }
-    
-    /**
-     * Checks if thief is at the museum. Thieves method.
-     * @param id thief id.
-     * @return true or false.
-     */
-    @Override
-    public synchronized boolean atMuseum(int id) {
-        if(getAssaultPartyElemPosition(id) == roomDistance){
-            setThiefState(ThievesState.AT_A_ROOM, id);
-            return true;
-        }
-        return false;
+        return clocks.clone();
     }
 
-    /**
-     * The thieves wait for another thief to crawl. Thieves method.
-     * @param id thief id.
-     */
     @Override
-    public synchronized void waitForMember(int id) {
-        while(id!=nextElem.getFirst()){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-    
-    /**
-     * Implements the crawl in movement. Thieves method.
-     * @param id thief id.
-     */
-    @Override
-    public synchronized void crawlIn(int id) {
+    public synchronized VectorTimestamp crawlIn(int id, VectorTimestamp vt) throws RemoteException {
+        clocks.update(vt);
         int nextPosition;
         int nextElemToCrawlPosition = getAssaultPartyElemPosition(id);
         int nextElemToCrawlMaxDispl = getThiefMaxDisplacement(id);
@@ -151,8 +93,9 @@ public class AssaultParty implements IMasterParty, IThievesParty{
                 setNextElemToCrawl();
             }
         }
-        updateAssautPartyElemPosition(id, nextPosition);
+        updateAssautPartyElemPosition(id, nextPosition, clocks.clone());
         notifyAll();
+        return clocks.clone();
     }
     
     /**
@@ -185,44 +128,9 @@ public class AssaultParty implements IMasterParty, IThievesParty{
         return pos;
     }
 
-    /**
-     * The thieves will await for all to be prepare to crawl out. Thieves method.
-     * @param id thief identification
-     */
     @Override
-    public synchronized void waitForReverseDirection(int id) {
-        counterToCrawlBack++;
-        setThiefState(ThievesState.CRAWLING_OUTWARDS, id);
-        notifyAll();
-        while(counterToCrawlBack<3){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-    
-    /**
-     * Checks if a thief is at the concentration site. Thieves method.
-     * @param id thief id.
-     * @return true or false.
-     */
-    @Override
-    public synchronized boolean atConcentration(int id) {
-        if(getAssaultPartyElemPosition(id) == 0){
-            setThiefState(ThievesState.OUTSIDE, id);
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Simulates the crawl movement back to the concentration site.
-     * @param id thief id.
-     */
-    @Override
-    public synchronized void crawlOut(int id) {
+    public synchronized VectorTimestamp crawlOut(int id, VectorTimestamp vt) throws RemoteException {
+        clocks.update(vt);
         int nextPosition;
         int nextElemToCrawlPosition = getAssaultPartyElemPosition(id);
         int nextElemToCrawlMaxDispl = getThiefMaxDisplacement(id);
@@ -243,7 +151,8 @@ public class AssaultParty implements IMasterParty, IThievesParty{
                 setNextElemToCrawl();
             }
         }
-        updateAssautPartyElemPosition(id, nextPosition);
+        updateAssautPartyElemPosition(id, nextPosition, clocks.clone());
+        return clocks.clone();
     }
     
     /**
@@ -266,267 +175,186 @@ public class AssaultParty implements IMasterParty, IThievesParty{
         return pos;
     }
 
-    /* ASSAULT_PARTY AS A CLIENT */
+    @Override
+    public synchronized int waitForSendAssaultParty(int id) throws RemoteException {
+        partyReady=false;
+        if(nElemParty==3){
+            nElemParty=0;
+            counterToCrawlBack = 0;
+            notifyAll();
+        }
+        nElemParty++;
+        notifyAll();
+        while(!partyReady){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return room_id;
+    }
+
+    @Override
+    public synchronized VectorTimestamp waitForMember(int id, VectorTimestamp vt) throws RemoteException {
+        clocks.update(vt);
+        while(id!=nextElem.getFirst()){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return clocks.clone();
+    }
+
+    @Override
+    public synchronized boolean atMuseum(int id) throws RemoteException {
+        if(getAssaultPartyElemPosition(id) == roomDistance){
+            setThiefState(ThievesState.AT_A_ROOM, id, clocks.clone());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public synchronized boolean atConcentration(int id) throws RemoteException {
+        if(getAssaultPartyElemPosition(id) == 0){
+            setThiefState(ThievesState.OUTSIDE, id, clocks.clone());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public synchronized VectorTimestamp waitForReverseDirection(int id, VectorTimestamp vt) throws RemoteException {
+        clocks.update(vt);
+        counterToCrawlBack++;
+        setThiefState(ThievesState.CRAWLING_OUTWARDS, id, clocks.clone());
+        notifyAll();
+        while(counterToCrawlBack<3){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AssaultParty.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return clocks.clone();
+    }
+
+    @Override
+    public void newHeist(VectorTimestamp vt) throws RemoteException {
+        log.newHeist(vt);
+    }
+
+    @Override
+    public void setMasterState(MasterState state, VectorTimestamp vt) throws RemoteException {
+        log.setMasterState(state,vt);
+    }
+
+    @Override
+    public void initAssaultPartyElemId() {
+        log.initAssaultPartyElemId();
+    }
+
+    @Override
+    public void setAssaultPartyAction(int rid1, int rid2) {
+        log.setAssaultPartyAction(rid1, rid2);
+    }
+
+    @Override
+    public void updateThiefSituation(int id, char s) {
+        log.updateThiefSituation(id, s);
+    }
+
+    @Override
+    public void updateAssaultPartyElemCv(int id, int cv, VectorTimestamp vt) throws RemoteException {
+        log.updateAssaultPartyElemCv(id, cv, vt);
+    }
+
+    @Override
+    public void setAssaultParty1RoomId(int rid) {
+        log.setAssaultParty1RoomId(rid);
+    }
+
+    @Override
+    public void setAssaultParty2RoomId(int rid) {
+        log.setAssaultParty2RoomId(rid);
+    }
+
+    @Override
+    public void updateAssaultPartyElemId(int party, int id) {
+        log.updateAssaultPartyElemId(party, id);
+    }
+
+    @Override
+    public void initThieves(ThievesState state, int id, char s, int md) throws RemoteException {
+        log.initThieves(state, id, s, md);
+    }
+
+    @Override
+    public void printResults() {
+        log.printResults();
+    }
+
+    @Override
+    public void setAssaultPartyMember(int party, int i, int id) {
+        log.setAssaultPartyMember(party, i, id);
+    }
+
+    @Override
+    public void setThiefState(ThievesState state, int id, VectorTimestamp vt) throws RemoteException {
+        log.setThiefState(state, id, vt);
+    }
+
+    @Override
+    public int getAssaultParty1RoomId() {
+        return log.getAssaultParty1RoomId();
+    }
+
+    @Override
+    public int getAssaultParty2RoomId() {
+        return log.getAssaultParty2RoomId();
+    }
+
+    @Override
+    public int getRoomDistance(int roomId) {
+        return log.getRoomDistance(roomId);
+    }
+
+    @Override
+    public int getAssaultPartyElemId(int party, int i) {
+        return log.getAssaultPartyElemId(party, i);
+    }
+
+    @Override
+    public int getAssaultPartyElemPosition(int id) {
+        return log.getAssaultPartyElemPosition(id);
+    }
+
+    @Override
+    public int getThiefMaxDisplacement(int id) {
+        return log.getThiefMaxDisplacement(id);
+    }
+
+    @Override
+    public void updateAssautPartyElemPosition(int id, int pos, VectorTimestamp vt) throws RemoteException {
+        log.updateAssautPartyElemPosition(id, pos, vt);
+    }
+
+    @Override
+    public void initMuseum(int id, int dt, int np) {
+        log.initMuseum(id, dt, np);
+    }
+
+    @Override
+    public int getMuseumPaintings(int rid) {
+        return log.getMuseumPaintings(rid);
+    }
+
+    @Override
+    public void updateMuseum(int rid, int np) {
+        log.updateMuseum(rid, np);
+    }
     
-    /**
-     * Get Assault Party1 server com.
-     * @return room id
-     */
-    private int getAssaultParty1RoomId() {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.GET_PARTY1_ROOM_ID);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.RESPONSE_INTEGER){
-            System.out.println("Party: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
-    }
-
-    /**
-     * ServerCom, Get assault party 2 room id.
-     * @return room id
-     */
-    private int getAssaultParty2RoomId() {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.GET_PARTY2_ROOM_ID);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.RESPONSE_INTEGER){
-            System.out.println("Party: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
-    }
-
-    /**
-     * ServerCom, get room distance.
-     * @param room_id room number
-     * @return distance to room
-     */
-    private int getRoomDistance(int room_id) {
-    ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.GET_DISTANCE, room_id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.RESPONSE_INTEGER){
-            System.out.println("Party: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
-    }
-
-    /**
-     * ServerCom, get assault party element id
-     * @param party party number
-     * @param i element number
-     * @return thief id
-     */
-    private int getAssaultPartyElemId(int party, int i) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.GET_PARTY_ELEM_ID, party, i);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.RESPONSE_INTEGER){
-            System.out.println("Party: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
-    }
-
-    /**
-     * ServerCom, set master state
-     * @param masterState master state
-     */
-    private void setMasterState(MasterState masterState) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.SET_MASTER_STATE, masterState);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Party: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, get party element position
-     * @param id thief id
-     * @return position
-     */
-    private int getAssaultPartyElemPosition(int id) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.GET_PARTY_ELEM_POS, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.RESPONSE_INTEGER){
-            System.out.println("Party: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
-    }
-
-    /**
-     * ServerCom, set thief state
-     * @param thievesState thief state
-     * @param id thief id
-     */
-    private void setThiefState(ThievesState thievesState, int id) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.SET_THIEF_STATE, thievesState, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Party: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
-    /**
-     * ServerCom, get thief max displacement
-     * @param id thief id
-     * @return max displacement
-     */
-    private int getThiefMaxDisplacement(int id) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.GET_MAX_DISPLACEMENT, id);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.RESPONSE_INTEGER){
-            System.out.println("Party: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        int out = inMessage.getInteger();
-        con.close();
-        return out;
-    }
-
-    /**
-     * ServerCom, update party element position
-     * @param id thief id
-     * @param nextPosition next position 
-     */
-    private void updateAssautPartyElemPosition(int id, int nextPosition) {
-        ClientCom con = new ClientCom(SimulConfig.logServerName, SimulConfig.logServerPort);
-        Message inMessage, outMessage;
-        while(!con.open()){
-            try{
-                sleep((long) (10));
-            }catch(InterruptedException e){}
-        }
-        outMessage = new Message(MessageType.UPDATE_PARTY_ELEM_POS, id, nextPosition);
-        con.writeObject(outMessage);
-        
-        inMessage = (Message) con.readObject();
-        MessageType type = inMessage.getType();
-        if(type != MessageType.ACK){
-            System.out.println("Concentration: Tipo inválido!");
-            System.out.println("Message:"+ inMessage.toString());
-            System.out.println(Arrays.toString(Thread.currentThread().getStackTrace()));
-            System.exit(1);
-        }
-        con.close();
-    }
-
 }

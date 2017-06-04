@@ -1,12 +1,15 @@
 package serverSide.general_info_repo;
 
+import interfaces.LogInterface;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import structures.enumerates.MasterState;
 import structures.enumerates.ThievesState;
+import structures.vectorClock.VectorTimestamp;
 
 /**
  * The log will be the gateway to all the information of the assault, trials,
@@ -14,7 +17,7 @@ import structures.enumerates.ThievesState;
  * with the log of the assault.
  * @author João Brito, 68137
  */
-public class Log {
+public class Log implements LogInterface {
     
     private final Heist heist = Heist.getInstance();
     /**
@@ -71,12 +74,14 @@ public class Log {
             for(int i=1; i<=6; i++){
                 head += "   Thief " + Integer.toString(i)+"   ";
             }
+            head += "                VCK";
             pw.println(head);
             
             head = "Stat  ";
             for(int i=1; i<=6; i++){
                 head += "Stat S MD    ";
             }
+            head += "0   1   2   3   4   5   6";
             pw.println(head);
             pw.print("                   ");
             head = "Assault party 1                       Assault party 2                         Museum";
@@ -139,10 +144,11 @@ public class Log {
     /**
      *  This method will be called on the start of the heist
      */
-    public synchronized void newHeist(){
+    @Override
+    public synchronized void newHeist(VectorTimestamp vt) throws RemoteException{
         initMasterState(MasterState.PLANNING_THE_HEIST);
         initAssaultPartyElemId();
-        printStatesLine();
+        printStatesLine(vt);
         printAssaultLine();
     }
     
@@ -158,11 +164,12 @@ public class Log {
      * This method will set the Master state and update the log.
      * @param state Master state.
      */
-    public synchronized void setMasterState(MasterState state){
+    @Override
+    public synchronized void setMasterState(MasterState state, VectorTimestamp vt) throws RemoteException{
         MasterState tmp = this.heist.getMasterState();
         this.heist.setMasterState(state);
         if(tmp!=state){
-            this.printStatesLine();
+            this.printStatesLine(vt);
             this.printAssaultLine();
         }
     }
@@ -174,6 +181,7 @@ public class Log {
      * @param s thief situation, can be W or P.
      * @param md thief maximum displacement.
      */
+    @Override
     public synchronized void initThieves(ThievesState state, int id, char s, int md) {
         this.heist.setThievesState(id, state);
         this.heist.setThievesSituation(id, s);
@@ -185,6 +193,7 @@ public class Log {
      * @param id thief identification.
      * @return thief max displacement.
      */
+    @Override
     public synchronized int getThiefMaxDisplacement(int id){
         return this.heist.getThiefMaxDisplacement(id);
     }
@@ -194,11 +203,12 @@ public class Log {
      * @param state Thief state.
      * @param id Thief identification.
      */
-    public synchronized void setThiefState(ThievesState state, int id){
+    @Override
+    public synchronized void setThiefState(ThievesState state, int id, VectorTimestamp vt) throws RemoteException{
         ThievesState tmp = this.heist.getThiefState(id);
         this.heist.setThievesState(id, state);
         if(tmp!=state){
-            this.printStatesLine();
+            this.printStatesLine(vt);
             this.printAssaultLine();
         }
     }
@@ -208,6 +218,7 @@ public class Log {
      * @param id Thief identification
      * @param s Thief situation wither 'W' or 'P'
      */
+    @Override
     public synchronized void updateThiefSituation(int id, char s){
         this.heist.setThievesSituation(id, s);
     }
@@ -218,6 +229,7 @@ public class Log {
      * @param dt Room distance.
      * @param np Room paintings.
      */
+    @Override
     public synchronized void initMuseum(int id, int dt, int np) {
         this.heist.setMuseumRoomsDistance(id, dt);
         this.heist.setMuseumRoomsPaintings(id, np);
@@ -228,6 +240,7 @@ public class Log {
      * @param rid Room identification.
      * @param np Room number of paintings.
      */
+    @Override
     public synchronized void updateMuseum(int rid, int np){
         this.heist.setMuseumRoomsPaintings(rid, np);
     }
@@ -237,6 +250,7 @@ public class Log {
      * @param rid Room identification.
      * @return Room number of paintings.
      */
+    @Override
     public synchronized int getMuseumPaintings(int rid){
         return this.heist.getMuseumRoomPaintings(rid);
     }
@@ -246,6 +260,7 @@ public class Log {
      * @param roomId room identification.
      * @return room distance.
      */
+    @Override
     public int getRoomDistance(int roomId) {
         return this.heist.getMuseumRoomDistance(roomId);
     }
@@ -256,6 +271,7 @@ public class Log {
      * @param i assault party member number.
      * @param id thief identification.
      */
+    @Override
     public synchronized void setAssaultPartyMember(int party, int i, int id){
         this.heist.setAssaultPartyElemId(party, i, id);
         this.heist.setAssaultPartyElemPos(id, 0);
@@ -278,14 +294,17 @@ public class Log {
      * @param i assault party element number.
      * @return assault party thief identification.
      */
+    @Override
     public synchronized int getAssaultPartyElemId(int party, int i){
         return this.heist.getAssaultPartyElemId(party, i);
     }
     
+    @Override
     public synchronized void initAssaultPartyElemId(){
         this.heist.initAssaultPartyElemId();
     }
     
+    @Override
     public synchronized void updateAssaultPartyElemId(int party, int id){
         this.heist.setAssaultPartyElemId(party, this.getAssaultPartyElemNumber(id), 0);
     }
@@ -295,6 +314,7 @@ public class Log {
      * @param id thief identification.
      * @return thief position.
      */
+    @Override
     public synchronized int getAssaultPartyElemPosition(int id){
         return this.heist.getAssaultPartyElemPos(id);
     }
@@ -303,10 +323,12 @@ public class Log {
      * This method will return the assault party #1 room number to assault.
      * @return museum room number.
      */
+    @Override
     public synchronized int getAssaultParty1RoomId(){
         return this.heist.getAssaultParty1Rid();
     }
     
+    @Override
     public synchronized void setAssaultParty1RoomId(int rid){
         this.heist.setAssaultParty1Rid(rid);
     }
@@ -315,10 +337,12 @@ public class Log {
      * This method will return the assault party #2 room number to assault.
      * @return museum room number.
      */
+    @Override
     public synchronized int getAssaultParty2RoomId(){
         return this.heist.getAssaultParty2Rid();
     }
     
+    @Override
     public synchronized void setAssaultParty2RoomId(int rid){
         this.heist.setAssaultParty2Rid(rid);
     }
@@ -328,9 +352,10 @@ public class Log {
      * @param id thief identification.
      * @param pos thief position.
      */
-    public synchronized void updateAssautPartyElemPosition(int id, int pos){
+    @Override
+    public synchronized void updateAssautPartyElemPosition(int id, int pos, VectorTimestamp vt) throws RemoteException{
         this.heist.setAssaultPartyElemPos(id, pos);
-        this.printStatesLine();
+        this.printStatesLine(vt);
         this.printAssaultLine();
     }
     
@@ -349,9 +374,10 @@ public class Log {
      * @param id thief identification.
      * @param cv thief canvas state.
      */
-    public synchronized void updateAssaultPartyElemCv(int id, int cv){
+    @Override
+    public synchronized void updateAssaultPartyElemCv(int id, int cv, VectorTimestamp vt) throws RemoteException{
         this.heist.setAssaultPartyElemCv(id, cv);
-        this.printStatesLine();
+        this.printStatesLine(vt);
         this.printAssaultLine();
     }
     
@@ -360,6 +386,7 @@ public class Log {
      * @param rid1 assault party#1 room to invade.
      * @param rid2 assault party#2 room to invade.
      */
+    @Override
     public synchronized void setAssaultPartyAction(int rid1, int rid2){
         this.heist.setAssaultParty1Rid(rid1);
         this.heist.setAssaultParty2Rid(rid2);
@@ -375,7 +402,7 @@ public class Log {
     /**
      * This method will update the states log.
      */
-    private void printStatesLine(){
+    private void printStatesLine(VectorTimestamp vt) throws RemoteException{
         pw.print(this.heist.getMasterState());
         pw.print("  ");
         
@@ -386,6 +413,11 @@ public class Log {
             pw.print("  ");
             pw.print(this.heist.getThiefMaxDisplacement(i));
             pw.print("    ");
+        }
+        
+        int[] arrayClocks = vt.toIntArray();
+        for(int i = 0; i<7; i++){
+            pw.print(String.format(" %2d", arrayClocks[i]));
         }
         
         pw.println();
@@ -476,6 +508,7 @@ public class Log {
     /**
      * This will print the results line
      */
+    @Override
     public void printResults(){
         pw.println("My friends, tonight's effort produced "+this.heist.getTotalPaintings()+" priceless paintings!");
         pw.println();

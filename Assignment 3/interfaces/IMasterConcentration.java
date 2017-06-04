@@ -23,6 +23,6 @@ public interface IMasterConcentration {
     /**
      * The master will end the heist and present the results.
      */
-    public VectorTimestamp sumUpResults() throws RemoteException;
+    public VectorTimestamp sumUpResults(VectorTimestamp vt) throws RemoteException;
     
 }
