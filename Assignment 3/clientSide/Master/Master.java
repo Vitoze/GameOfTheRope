@@ -10,13 +10,30 @@ import java.rmi.RemoteException;
  * @author João Brito, 68137
  */
 public class Master extends Thread{
-    
+    /**
+     *  The state of Master.
+     *  @serialField state
+     */
     private final MasterState state;
-    
+    /**
+     * Interface of control collection site
+     */
     private final ControlCollectionSiteInterface control;
+    /**
+     * Interface of concentration site
+     */
     private final ConcentrationSiteInterface concentration;
+    /**
+     * Interface of assault party #1 
+     */
     private final AssaultPartyInterface party1;
+    /**
+     * Interface of assault party #2 
+     */
     private final AssaultPartyInterface party2;
+    /**
+     * Interface of log
+     */
     private final LogInterface log;
     
     private final VectorTimestamp myClock;

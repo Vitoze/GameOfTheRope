@@ -15,14 +15,36 @@ import structures.vectorClock.VectorTimestamp;
  * @author João Brito, 68137
  */
 public class AssaultParty implements AssaultPartyInterface{
+    /**
+     * The variable boolean represent if party is ready.
+     */
     private boolean partyReady = false;
+    /**
+     * Party number.
+     */
     private int party_number = 0;
+    /**
+     * Variable is used to count when crawl back
+     */
     private int counterToCrawlBack = 0;
+    /**
+     * Room identification
+     */
     private int room_id;
+    /**
+     * Number of element party
+     */
     private int nElemParty = 0;
+    /**
+     * Room distance
+     */
     private int roomDistance = 0;
+
     private final LinkedList<Integer> nextElem;
     private VectorTimestamp clocks;
+    /**
+     * Interface of Log
+     */
     private final LogInterface log;
     
     /**
@@ -34,6 +56,9 @@ public class AssaultParty implements AssaultPartyInterface{
         this.clocks = new VectorTimestamp(7, 0);
     }
 
+    /**
+     * The Master will send the assault party. Master method.
+     */
     @Override
     public synchronized VectorTimestamp sendAssaultParty(int aid, VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -69,7 +94,12 @@ public class AssaultParty implements AssaultPartyInterface{
         notifyAll();
         return clocks.clone();
     }
-
+    
+    /**
+     * Implements the crawl in movement. Thieves method.
+     * @param id thief id.
+     * @param vt vectortimestamp
+     */
     @Override
     public synchronized VectorTimestamp crawlIn(int id, VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -128,6 +158,11 @@ public class AssaultParty implements AssaultPartyInterface{
         return pos;
     }
 
+    /**
+     * Simulates the crawl movement back to the concentration site.
+     * @param id thief id.
+     * @param vt vectortimestamp
+     */
     @Override
     public synchronized VectorTimestamp crawlOut(int id, VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -175,6 +210,12 @@ public class AssaultParty implements AssaultPartyInterface{
         return pos;
     }
 
+    /**
+     * Wait for send assault party
+     * @param id
+     * @return room_id room identification
+     * @throws RemoteException 
+     */
     @Override
     public synchronized int waitForSendAssaultParty(int id) throws RemoteException {
         partyReady=false;
@@ -195,6 +236,13 @@ public class AssaultParty implements AssaultPartyInterface{
         return room_id;
     }
 
+    /**
+     * Wait for member
+     * @param id
+     * @param vt vectortimestamp
+     * @return vectortimestamp
+     * @throws RemoteException 
+     */
     @Override
     public synchronized VectorTimestamp waitForMember(int id, VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -208,6 +256,11 @@ public class AssaultParty implements AssaultPartyInterface{
         return clocks.clone();
     }
 
+    /**
+     * Checks if thief is at the museum. Thieves method.
+     * @param id thief id.
+     * @return true or false.
+     */
     @Override
     public synchronized boolean atMuseum(int id) throws RemoteException {
         if(getAssaultPartyElemPosition(id) == roomDistance){
@@ -217,6 +270,11 @@ public class AssaultParty implements AssaultPartyInterface{
         return false;
     }
 
+    /**
+     * Checks if a thief is at the concentration site. Thieves method.
+     * @param id thief id.
+     * @return true or false.
+     */
     @Override
     public synchronized boolean atConcentration(int id) throws RemoteException {
         if(getAssaultPartyElemPosition(id) == 0){
@@ -226,6 +284,13 @@ public class AssaultParty implements AssaultPartyInterface{
         return false;
     }
 
+    /**
+     * Wait for reverse direction
+     * @param id
+     * @param vt vectortimestamp
+     * @return vectortimestamp
+     * @throws RemoteException 
+     */
     @Override
     public synchronized VectorTimestamp waitForReverseDirection(int id, VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -241,7 +306,7 @@ public class AssaultParty implements AssaultPartyInterface{
         }
         return clocks.clone();
     }
-
+    
     @Override
     public void newHeist(VectorTimestamp vt) throws RemoteException {
         log.newHeist(vt);

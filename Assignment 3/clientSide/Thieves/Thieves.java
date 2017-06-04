@@ -16,16 +16,49 @@ import structures.vectorClock.VectorTimestamp;
  */
 public class Thieves extends Thread {
     
+    /**
+     * Thief index.
+     * @serialField id
+     */
     private final int id;
+    /**
+     * Thief state.
+     * @serialField state
+     */
     private final ThievesState state;
+    /**
+     * Thief situation.
+     * @serialField s
+     */
     private final char s;
+    /**
+     * Thief maximum displacement.
+     * @serialField md
+     */
     private final int md;
-    
+    /**
+     * Interface of control collection site
+     */
     private final ControlCollectionSiteInterface control;
+    /**
+     * Interface of concentration site
+     */
     private final ConcentrationSiteInterface concentration;
+    /**
+     * Interface of assault party #1 
+     */
     private final AssaultPartyInterface party1;
+    /**
+     * Interface of assault party #2 
+     */
     private final AssaultPartyInterface party2;
+    /**
+     * Interface of log
+     */
     private final LogInterface log;
+    /**
+     * Interface of museum
+     */
     private final MuseumInterface museum;
     
     private final VectorTimestamp myClock;

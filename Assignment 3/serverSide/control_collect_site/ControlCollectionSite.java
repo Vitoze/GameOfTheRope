@@ -16,9 +16,19 @@ import structures.vectorClock.VectorTimestamp;
  *  @author João Brito, 68137
  */
 public class ControlCollectionSite implements ControlCollectionSiteInterface {
+    /**
+     * The Boolean variable represents whether the canvas was collected or not.
+     */
     private boolean canvasCollected = false;
+    /**
+     * Hash table represents the museum.
+     */
     private final HashMap<Integer, Boolean> museum;
+    /**
+     * Number of the element to wait.
+     */
     private int nElemToWait = 0;
+    
     private int elemParty1 = 3;
     private int elemParty2 = 3;
     private VectorTimestamp clocks;
@@ -34,6 +44,10 @@ public class ControlCollectionSite implements ControlCollectionSiteInterface {
         this.clocks = new VectorTimestamp(7, 0);
     }
 
+    /**
+     * In Master life cycle, transition between "Planning the heist" and "Deciding what to do",
+     * initiates a heist. Master method.
+     */
     @Override
     public synchronized VectorTimestamp startOperations(VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -46,6 +60,9 @@ public class ControlCollectionSite implements ControlCollectionSiteInterface {
         return clocks.clone();
     }
 
+    /**
+     * The master will wait for the assault party arrival. Master method.
+     */
     @Override
     public synchronized VectorTimestamp takeARest(VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -60,6 +77,10 @@ public class ControlCollectionSite implements ControlCollectionSiteInterface {
         return clocks.clone();
     }
 
+    /**
+     * The Master decides what to do next
+     * @return 1 to prepare new assault or 2 to end heist. Master method.
+     */
     @Override
     public synchronized int[] appraiseSit() throws RemoteException {
         nElemToWait = 6;
@@ -100,6 +121,12 @@ public class ControlCollectionSite implements ControlCollectionSiteInterface {
         return decision;
     }
 
+    /**
+     * The thief will hand a canvas. Thieves method.
+     * @param id thief id.
+     * @param rid room number.
+     * @param cv has canvas? 0 or 1.
+     */
     @Override
     public synchronized VectorTimestamp handACanvas(int id, int party, int rid, int cv, VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);

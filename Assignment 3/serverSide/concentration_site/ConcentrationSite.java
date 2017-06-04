@@ -15,13 +15,32 @@ import structures.vectorClock.VectorTimestamp;
  * @author João Brito, 68137
  */
 public class ConcentrationSite implements ConcentrationSiteInterface {
+    /**
+     * The variable boolean represent if assault is called.
+     */
     private boolean callAssault = false;
+    /**
+     * The variable boolean represent if thieves is ready.
+     */
     private boolean thievesReady = false;
+    /**
+     * The variable boolean represent if it is last assault.
+     */
     private boolean lastAssault = false;
+    /**
+     * The variable represents whether it is the end of theft.
+     */
     private boolean endHeist = false;
+    /**
+     * Represents order.
+     */
     private int orders = -1;
+    
     private int counter1 = 0;
     private int counter2 = 0;
+    /**
+     * List of thieves.
+     */
     private final LinkedList<Integer> thieves;
     private VectorTimestamp clocks;
     private final LogInterface log;
@@ -36,6 +55,10 @@ public class ConcentrationSite implements ConcentrationSiteInterface {
         this.clocks = new VectorTimestamp(7, 0);
     }
 
+    /**
+     * The master will order to the thieves to begin to prepare the assault party.
+     * @param last '0' last assault, '1' if not. Master method.
+     */
     @Override
     public synchronized VectorTimestamp prepareAssaultParty(int last, VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -58,6 +81,9 @@ public class ConcentrationSite implements ConcentrationSiteInterface {
         return clocks.clone();
     }
 
+    /**
+     * The master will wait until the thieves are ready to go. Master method.
+     */
     @Override
     public synchronized VectorTimestamp waitForPrepareExcursion(VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -71,6 +97,9 @@ public class ConcentrationSite implements ConcentrationSiteInterface {
         return clocks.clone();
     }
 
+    /**
+     * The master will present the result of the heist. Master method.
+     */
     @Override
     public synchronized VectorTimestamp sumUpResults(VectorTimestamp vt) throws RemoteException {
         clocks.update(vt);
@@ -82,6 +111,12 @@ public class ConcentrationSite implements ConcentrationSiteInterface {
         return clocks.clone();
     }
 
+    /**
+     * The thieves are sleeping in this method waiting for the master inform
+     * the next assault. Thieves method.
+     * @param id thief id.
+     * @return order.
+     */
     @Override
     public synchronized int amINeeded(int id) throws RemoteException {
         this.callAssault = false;
@@ -110,6 +145,11 @@ public class ConcentrationSite implements ConcentrationSiteInterface {
         return orders;
     }
 
+    /**
+     * The thieves will begin to prepare the excursion to the assault party. Thieves method.
+     * @param id thief id.
+     * @return party number.
+     */
     @Override
     public synchronized int prepareExcursion(int id) throws RemoteException {
         int party;
