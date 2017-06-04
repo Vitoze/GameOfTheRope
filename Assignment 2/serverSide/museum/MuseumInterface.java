@@ -13,7 +13,13 @@ import java.net.SocketException;
  */
 public class MuseumInterface implements ServerInterface{
     
+    /**
+     * Instance of museum
+     */
     private final Museum museum;
+    /**
+     * The boolean variable represents if the service terminates.
+     */
     private boolean serviceEnded;
     
     public MuseumInterface(Museum museum){

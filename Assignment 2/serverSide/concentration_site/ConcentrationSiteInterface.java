@@ -12,8 +12,14 @@ import java.net.SocketException;
  * @author João Brito
  */
 public class ConcentrationSiteInterface implements ServerInterface {
-
+    
+    /**
+     * Concentration site.
+     */
     private final ConcentrationSite concentration;
+    /**
+     * The boolean variable represents if the service terminates.
+     */
     private boolean serviceEnded;
     
     public ConcentrationSiteInterface(ConcentrationSite concentration){

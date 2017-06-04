@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.SocketException;
 
 /**
- * Control & Collection site main.
+ * Control Collection site main.
  * @author João Brito
  */
 public class ControlCollectionSiteMain {

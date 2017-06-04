@@ -17,9 +17,19 @@ import java.util.logging.Logger;
  *  @author João Brito, 68137
  */
 public class ControlCollectionSite implements IMaster, IThieves {
+    /**
+     * The Boolean variable represents whether the canvas was collected or not.
+     */
     private boolean canvasCollected = false;
+    /**
+     * Hash table represents the museum.
+     */
     private final HashMap<Integer, Boolean> museum;
+    /**
+     * Number of the element to wait.
+     */
     private int nElemToWait = 0;
+    
     private int elemParty1 = 3;
     private int elemParty2 = 3;
     

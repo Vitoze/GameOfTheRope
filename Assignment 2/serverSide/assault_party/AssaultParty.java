@@ -26,7 +26,7 @@ public class AssaultParty implements IMaster, IThieves{
     private final LinkedList<Integer> nextElem;
     
     /**
-     * Init the assault party#1.
+     * Initiate the assault party#1.
      */
     public AssaultParty(){
         nextElem = new LinkedList<>();

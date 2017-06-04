@@ -1,13 +1,13 @@
 package serverSide.assault_party;
 
 /**
- * Tieves interface of AssaultParty#2 instance.
+ * Tieves interface of AssaultParty instance.
  * @author João Brito, 68137
  */
 public interface IThieves {
     
     /**
-     * The thieves wil crawl to the museum.
+     * The thieves will crawl to the museum.
      * @param id thief if
      */
     public void crawlIn(int id);

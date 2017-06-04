@@ -9,20 +9,61 @@ import clientSide.Thieves.ThievesState;
  *  @author João Brito, 68137
  */
 public class Heist{
+    /**
+     * Total number of paintings.
+     */
     private int totalPaintings;
+    /**
+     * Museum room identification of the assault party #1.
+     */
     private int assault_party1_Rid;
+    /**
+     * Museum room identification of the assault party #2.
+     */
     private int assault_party2_Rid;
+    /**
+     * Instance of the master state.
+     */
     private MasterState master_state;
+    /**
+     * Hashtable contains the assault party canvas.
+     */
     private final HashMap<Integer, Integer> assault_party_cv;
+    /**
+     * Hashtable contains the assault party positions.
+     */
     private final HashMap<Integer, Integer> assault_party_pos;
+    /**
+     * Hashtable contains the states of thieves.
+     */
     private final HashMap<Integer, ThievesState> thieves_states;
+    /**
+     * HashTable contains the situations of thieves.
+     */
     private final HashMap<Integer, Character> thieves_situation;
+    /**
+     * HashTable contain the distance from the museum rooms.
+     */
     private final HashMap<Integer, Integer> museum_rooms_distance;
+    /**
+     * HashTable contains number of paintings of museum rooms.
+     */
     private final HashMap<Integer, Integer> museum_rooms_paintings;
+    /**
+     * HashTable contains thieves maximum displacement.
+     */
     private final HashMap<Integer, Integer> thieves_maxDisplacement;
+    /**
+     * HashTable contains the number of elements of the assault.
+     */
     private final HashMap<Integer, Integer> assault_party_elem_number;
+    /**
+     * HashTable of the assault party.
+     */
     private final HashMap<Integer, HashMap<Integer,Integer>> assault_party;
-    
+    /**
+     * Instance of heist.
+     */
     private static Heist instance = null;
      
     private Heist(){

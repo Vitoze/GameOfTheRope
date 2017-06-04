@@ -66,7 +66,7 @@ public class ServerCom {
     }
 
     /**
-     * Communication channel instantiation (second form).     
+     * Communication channel instantiation (second form) - with listening socket.     
      *
      * @param portNumb server listening port number
      * @param lSocket server's listening socket

@@ -12,6 +12,10 @@ import java.util.Arrays;
  */
 public class Master extends Thread{
     
+    /**
+     *  The state of Master.
+     *  @serialField state
+     */
     private final MasterState state;
     
     /**
