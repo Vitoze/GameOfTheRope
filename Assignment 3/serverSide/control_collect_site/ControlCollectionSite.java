@@ -36,7 +36,7 @@ public class ControlCollectionSite implements ControlCollectionSiteInterface {
     
     /**
      * Init the Control Site instance.
-     * @param log
+     * @param log repo site
      */
     public ControlCollectionSite(LogInterface log){
         museum = new HashMap<>();

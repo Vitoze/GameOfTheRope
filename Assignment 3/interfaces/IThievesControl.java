@@ -15,6 +15,9 @@ public interface IThievesControl {
      * @param party party number.
      * @param rid room number.
      * @param cv has canvas? 0 or 1.
+     * @param vt current timestamp
+     * @return new timestamp
+     * @throws java.rmi.RemoteException rmi exception
      */
     public VectorTimestamp handACanvas(int id, int party, int rid, int cv, VectorTimestamp vt) throws RemoteException;
 

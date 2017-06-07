@@ -68,12 +68,12 @@ public class Thieves extends Thread {
      * It will be passed to the thief the methods that it has access.
      * @param id Thief identification.
      * @param md Thief maximum displacement.
-     * @param control
-     * @param concentration
-     * @param party1
-     * @param party2
-     * @param museum
-     * @param log
+     * @param control control site
+     * @param concentration concentration site
+     * @param party1 ap#1 site
+     * @param party2 ap#2 site
+     * @param museum museum site
+     * @param log repo site
      */
     public Thieves(int id, int md, ControlCollectionSiteInterface control, ConcentrationSiteInterface concentration, AssaultPartyInterface party1, AssaultPartyInterface party2, MuseumInterface museum, LogInterface log){
         this.id = id;

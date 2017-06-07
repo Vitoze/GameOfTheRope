@@ -15,7 +15,7 @@ import java.rmi.server.UnicastRemoteObject;
 import structures.constants.RegistryConfig;
 
 /**
- * Control & Collection site main.
+ * Control and Collection site main.
  * @author João Brito
  */
 public class ControlCollectionSiteMain {

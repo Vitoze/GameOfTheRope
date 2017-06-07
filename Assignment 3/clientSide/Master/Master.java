@@ -41,11 +41,11 @@ public class Master extends Thread{
     
     /**
      * It will be passed to the Master the methods it has access.
-     * @param control
-     * @param concentration
-     * @param party1
-     * @param party2
-     * @param log
+     * @param control control site
+     * @param concentration concentration site
+     * @param party1 ap site
+     * @param party2 ap#2 site
+     * @param log repostiory
      */
     public Master(ControlCollectionSiteInterface control, ConcentrationSiteInterface concentration, AssaultPartyInterface party1, AssaultPartyInterface party2, LogInterface log){
         this.setName("Master");

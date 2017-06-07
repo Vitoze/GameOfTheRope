@@ -12,6 +12,9 @@ public interface IMasterParty {
     /**
      * The Master will send the assault party out.
      * @param aid assault party id
+     * @param vt current timestamp
+     * @return updated timestamp
+     * @throws java.rmi.RemoteException excepetion rmi
      */
     public VectorTimestamp sendAssaultParty(int aid, VectorTimestamp vt) throws RemoteException;
 }

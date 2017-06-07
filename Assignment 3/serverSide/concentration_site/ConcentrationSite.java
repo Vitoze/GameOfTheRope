@@ -47,7 +47,7 @@ public class ConcentrationSite implements ConcentrationSiteInterface {
 
     /**
      * Init the concentration site.
-     * @param log
+     * @param log repo site
      */
     public ConcentrationSite(LogInterface log) {
         thieves = new LinkedList<>();

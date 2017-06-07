@@ -49,6 +49,7 @@ public class AssaultParty implements AssaultPartyInterface{
     
     /**
      * Init the assault party#1.
+     * @param log repo site
      */
     public AssaultParty(LogInterface log){
         nextElem = new LinkedList<>();
@@ -212,9 +213,9 @@ public class AssaultParty implements AssaultPartyInterface{
 
     /**
      * Wait for send assault party
-     * @param id
+     * @param id thief id
      * @return room_id room identification
-     * @throws RemoteException 
+     * @throws RemoteException rmi expception
      */
     @Override
     public synchronized int waitForSendAssaultParty(int id) throws RemoteException {
@@ -238,10 +239,10 @@ public class AssaultParty implements AssaultPartyInterface{
 
     /**
      * Wait for member
-     * @param id
+     * @param id thief id
      * @param vt vectortimestamp
      * @return vectortimestamp
-     * @throws RemoteException 
+     * @throws RemoteException rmi exception
      */
     @Override
     public synchronized VectorTimestamp waitForMember(int id, VectorTimestamp vt) throws RemoteException {
@@ -286,10 +287,10 @@ public class AssaultParty implements AssaultPartyInterface{
 
     /**
      * Wait for reverse direction
-     * @param id
+     * @param id thief id
      * @param vt vectortimestamp
      * @return vectortimestamp
-     * @throws RemoteException 
+     * @throws RemoteException rmi excepton
      */
     @Override
     public synchronized VectorTimestamp waitForReverseDirection(int id, VectorTimestamp vt) throws RemoteException {

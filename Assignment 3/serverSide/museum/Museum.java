@@ -19,6 +19,7 @@ public class Museum implements MuseumInterface{
     
     /**
      * Init the Museum instance.
+     * @param log repo site
      */
     public Museum(LogInterface log){
         this.log = log;
